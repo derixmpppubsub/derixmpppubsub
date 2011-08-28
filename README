@@ -1,0 +1,80 @@
+protocl according to crschmidt:
+
+<iq to='crschmidt@crschmidt.net/sparql' type='get' id='2'>
+<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>
+SELECT ?a WHERE { ?a &http://xmlns.com/foaf/0.1/nick> "crschmidt". }
+</query>
+</iq>
+
+<iq to='crschmidt@crschmidt.net/sparql' type='result' id='2' from='crschmidt@crschmidt.net/sparql'>
+<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>
+<meta />
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name='a'/>
+  </head>
+  <results>
+    <result>
+      <a uri='http://crschmidt.net/foaf.rdf#crschmidt'/>
+    </result>
+    <result>
+      <a bnodeid='r1124565507r58'/>
+    </result>
+    <result>
+      <a bnodeid='r1125462262r174'/>
+    </result>
+  </results>
+</sparql></xml>
+</query>
+</iq>
+
+protocl according to danbri:
+
+
+<iq id="S3IG2-4" to="danbri@livejournal.com/sparqlserver" type="get">
+<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>
+PREFIX foaf: &lt;http://xmlns.com/foaf/0.1/&gt; SELECT DISTINCT ?o WHERE {?s foaf:name ?o.}
+</query>
+</iq>
+<iq id="40z5D-4" to="bandri@livejournal.com/sparqlclient" 
+  from="danbri@livejournal.com/sparqlserver" type="result">
+<query-result xmlns="http://www.w3.org/2005/09/xmpp-sparql-binding">
+<meta comments="content generated via DOM conversion."/>
+<sparql xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema#" 
+	xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="o"/>
+  </head>
+  <results>
+    <result>
+      <binding name="o">
+        <literal>Libby Miller</literal>
+      </binding>
+    </result>
+    <result>
+      <binding name="o">
+        <literal>Tim Berners-Lee</literal>
+      </binding>
+    </result>
+<!-- ... more bindings here -->
+  </results>
+</sparql>
+</query-result>
+</iq>
+
+protocl we have so far:
+
+
+<iq id="QmBTs-9" to="pubsub.vmuss12.deri.ie" type="set">
+  <pubsub xmlns="http://jabber.org/protocol/pubsub">
+    <publish node="testNodeWithPayloadU2">
+      <item id="test1314540468884">
+        <book xmlns="pubsub:test:book">
+          <author name="Stephen King"/>
+        </book>
+      </item>
+    </publish>
+  </pubsub>
+</iq>
