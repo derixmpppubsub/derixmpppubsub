@@ -1,0 +1,231 @@
+    	String query = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>"+"<![CDATA["+triples+"]]>"+"</query>";
+	    System.out.println(query);
+	    logger.debug(query);
+    	
+	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
+	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(testid, payloadNS);
+	    node.send(item);
+
+<iq id="IwQnu-9" to="pubsub.vmuss12.deri.ie" type="set">
+  <pubsub xmlns="http://jabber.org/protocol/pubsub">
+    <publish node="testNodeWithPayloadU2">
+      <item id="test1314626463634">
+        <query xmlns="http://www.w3.org/2005/09/xmpp-sparql-binding"><![CDATA[PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .]]></query>
+      </item>
+    </publish>
+  </pubsub>
+</iq>
+
+<message id="testNodeWithPayloadU2__testuser2@vmuss12.deri.ie__4rQDG" to="testuser2@vmuss12.deri.ie" from="pubsub.vmuss12.deri.ie">
+<event xmlns='http://jabber.org/protocol/pubsub#event'>
+<items node='testNodeWithPayloadU2'>
+<item id='test1314626463634'>
+<query xmlns="http://www.w3.org/2005/09/xmpp-sparql-binding">PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .</query>
+</item>
+</items>
+</event>
+<headers xmlns='http://jabber.org/protocol/shim'><header name='pubsub#subid'>DRQ58fwxSLB1IjVnSVb2ulhOmu55vxuiXhT3C177</header></headers>
+</message>
+
+
+2462 [main] DEBUG org.deri.xmpppubsub.Publisher  - <query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'><![CDATA[PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .]]></query>
+2524 [main] INFO org.deri.xmpppubsub.Publisher  - query sent
+[Fatal Error] :1:330: Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+ERROR:  'Element type "http:" must be followed by either attribute specifications, ">" or "/>".'
+
+** Transformation error
+   org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 330; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 330; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1234)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transformIdentity(TransformerImpl.java:613)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:711)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:317)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.formatXML(EnhancedDebugger.java:893)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.access$1700(EnhancedDebugger.java:65)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger$21.run(EnhancedDebugger.java:793)
+	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:226)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:647)
+	at java.awt.EventQueue.access$000(EventQueue.java:96)
+	at java.awt.EventQueue$1.run(EventQueue.java:608)
+	at java.awt.EventQueue$1.run(EventQueue.java:606)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:617)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+
+
+-------------
+    	String query = StringEscapeUtils.escapeHtml4(triples);
+//    	String query = URLDecoder.decode(triples, "UTF-8");
+//    	String query = "<![CDATA["+triples+"]]>";
+//    	String query = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>"+"<![CDATA["+triples+"]]>"+"</query>";
+	    System.out.println(query);
+	    logger.debug(query);
+    	
+	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
+	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(testid, payloadNS);
+	    node.send(item);
+
+<iq id="5fumY-9" to="pubsub.vmuss12.deri.ie" type="set">
+  <pubsub xmlns="http://jabber.org/protocol/pubsub">
+    <publish node="testNodeWithPayloadU2">
+      <item id="test1314626745342">PREFIX dc:&lt;http://purl.org/dc/elements/1.1/&gt; INSERT DATA &lt;http://example/book1&gt; dc:title 'A new book' ; dc:creator 'A.N. Other' .</item>
+    </publish>
+  </pubsub>
+</iq>
+
+<iq id="5fumY-9" to="testuser2@vmuss12.deri.ie/Smack" from="pubsub.vmuss12.deri.ie" type="error"><pubsub xmlns="http://jabber.org/protocol/pubsub"><publish xmlns="http://jabber.org/protocol/pubsub"><item>PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .</item></publish></pubsub><error code="400" type="MODIFY"><bad-request xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"/><payload-required xmlns="http://jabber.org/protocol/pubsub#errors"></payload-required></error></iq>
+
+2891 [main] DEBUG org.deri.xmpppubsub.Publisher  - got node
+PREFIX dc:&lt;http://purl.org/dc/elements/1.1/&gt; INSERT DATA &lt;http://example/book1&gt; dc:title 'A new book' ; dc:creator 'A.N. Other' .
+2922 [main] DEBUG org.deri.xmpppubsub.Publisher  - PREFIX dc:&lt;http://purl.org/dc/elements/1.1/&gt; INSERT DATA &lt;http://example/book1&gt; dc:title 'A new book' ; dc:creator 'A.N. Other' .
+Exception in thread "main" bad-request(400)
+	at org.jivesoftware.smackx.pubsub.packet.SyncPacketSend.getReply(SyncPacketSend.java:53)
+	at org.jivesoftware.smackx.pubsub.packet.SyncPacketSend.getReply(SyncPacketSend.java:61)
+	at org.jivesoftware.smackx.pubsub.LeafNode.send(LeafNode.java:299)
+	at org.jivesoftware.smackx.pubsub.LeafNode.send(LeafNode.java:276)
+	at org.deri.xmpppubsub.Publisher.main(Publisher.java:204)
+[Fatal Error] :1:222: Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+ERROR:  'Element type "http:" must be followed by either attribute specifications, ">" or "/>".'
+
+** Transformation error
+   org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 222; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 222; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1234)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transformIdentity(TransformerImpl.java:613)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:711)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:317)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.formatXML(EnhancedDebugger.java:893)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.access$1700(EnhancedDebugger.java:65)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger$21.run(EnhancedDebugger.java:793)
+	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:226)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:647)
+	at java.awt.EventQueue.access$000(EventQueue.java:96)
+	at java.awt.EventQueue$1.run(EventQueue.java:608)
+	at java.awt.EventQueue$1.run(EventQueue.java:606)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:617)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+-----
+	    String beginNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>";
+	    String endNS = "</query>";
+    	String triples = "PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+//	    String query = HTMLEntities.htmlAngleBrackets(triples);
+//    	String query = StringEscapeUtils.escapeHtml4(triples);
+//    	String query = URLDecoder.decode(triples, "UTF-8");
+//    	String query = "<![CDATA["+triples+"]]>";
+//    	String query = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>"+"<![CDATA["+triples+"]]>"+"</query>";
+	    String query = beginNS + triples + endNS;
+    	System.out.println(query);
+	    logger.debug(query);
+
+<iq id="bg9a1-9" to="pubsub.vmuss12.deri.ie" type="set"><pubsub xmlns="http://jabber.org/protocol/pubsub"><publish node='testNodeWithPayloadU2'><item id='test1314627081130'><query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .</query></item></publish></pubsub></iq>
+
+405 [main] DEBUG org.deri.xmpppubsub.Publisher  - <query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .</query>
+[Fatal Error] :1:252: Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+ERROR:  'Element type "http:" must be followed by either attribute specifications, ">" or "/>".'
+
+** Transformation error
+   org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 252; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 252; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1234)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transformIdentity(TransformerImpl.java:613)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:711)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:317)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.formatXML(EnhancedDebugger.java:893)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.access$1700(EnhancedDebugger.java:65)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger$22.run(EnhancedDebugger.java:854)
+	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:226)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:647)
+	at java.awt.EventQueue.access$000(EventQueue.java:96)
+	at java.awt.EventQueue$1.run(EventQueue.java:608)
+	at java.awt.EventQueue$1.run(EventQueue.java:606)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:617)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+Exception in thread "main" No response from server.: 
+	at org.jivesoftware.smackx.pubsub.packet.SyncPacketSend.getReply(SyncPacketSend.java:50)
+	at org.jivesoftware.smackx.pubsub.packet.SyncPacketSend.getReply(SyncPacketSend.java:61)
+	at org.jivesoftware.smackx.pubsub.LeafNode.send(LeafNode.java:299)
+	at org.jivesoftware.smackx.pubsub.LeafNode.send(LeafNode.java:276)
+	at org.deri.xmpppubsub.Publisher.main(Publisher.java:207)
+
+----
+	    String beginNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>";
+	    String endNS = "</query>";
+    	String triples = "PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+//	    String query = HTMLEntities.htmlAngleBrackets(triples);
+//    	String query = StringEscapeUtils.escapeHtml4(triples);
+//    	String query = URLDecoder.decode(triples, "UTF-8");
+//    	String query = "<![CDATA["+triples+"]]>";
+//    	String query = beginNS+"<![CDATA["+triples+"]]>"+endNS;
+    	triples = StringEscapeUtils.escapeHtml4(triples);
+	    String query = beginNS + triples + endNS;
+    	System.out.println(query);
+	    logger.debug(query);
+    	
+	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
+	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(testid, payloadNS);
+	    node.send(item);
+
+<iq id="EySz4-9" to="pubsub.vmuss12.deri.ie" type="set">
+  <pubsub xmlns="http://jabber.org/protocol/pubsub">
+    <publish node="testNodeWithPayloadU2">
+      <item id="test1314627279507">
+        <query xmlns="http://www.w3.org/2005/09/xmpp-sparql-binding">PREFIX dc:&lt;http://purl.org/dc/elements/1.1/&gt; INSERT DATA &lt;http://example/book1&gt; dc:title 'A new book' ; dc:creator 'A.N. Other' .</query>
+      </item>
+    </publish>
+  </pubsub>
+</iq>
+
+<message id="testNodeWithPayloadU2__testuser2@vmuss12.deri.ie__YaLQl" to="testuser2@vmuss12.deri.ie" from="pubsub.vmuss12.deri.ie"><event xmlns='http://jabber.org/protocol/pubsub#event'><items node='testNodeWithPayloadU2'><item id='test1314627279507'><query xmlns="http://www.w3.org/2005/09/xmpp-sparql-binding">PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .</query></item></items></event><headers xmlns='http://jabber.org/protocol/shim'><header name='pubsub#subid'>DRQ58fwxSLB1IjVnSVb2ulhOmu55vxuiXhT3C177</header></headers></message>
+
+2312 [main] DEBUG org.deri.xmpppubsub.Publisher  - got node
+<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>PREFIX dc:&lt;http://purl.org/dc/elements/1.1/&gt; INSERT DATA &lt;http://example/book1&gt; dc:title 'A new book' ; dc:creator 'A.N. Other' .</query>
+2337 [main] DEBUG org.deri.xmpppubsub.Publisher  - <query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>PREFIX dc:&lt;http://purl.org/dc/elements/1.1/&gt; INSERT DATA &lt;http://example/book1&gt; dc:title 'A new book' ; dc:creator 'A.N. Other' .</query>
+2574 [main] INFO org.deri.xmpppubsub.Publisher  - query sent
+[Fatal Error] :1:330: Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+ERROR:  'Element type "http:" must be followed by either attribute specifications, ">" or "/>".'
+
+** Transformation error
+   org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 330; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 330; Element type "http:" must be followed by either attribute specifications, ">" or "/>".
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1234)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transformIdentity(TransformerImpl.java:613)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:711)
+	at com.sun.org.apache.xalan.internal.xsltc.trax.TransformerImpl.transform(TransformerImpl.java:317)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.formatXML(EnhancedDebugger.java:893)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger.access$1700(EnhancedDebugger.java:65)
+	at org.jivesoftware.smackx.debugger.EnhancedDebugger$21.run(EnhancedDebugger.java:793)
+	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:226)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:647)
+	at java.awt.EventQueue.access$000(EventQueue.java:96)
+	at java.awt.EventQueue$1.run(EventQueue.java:608)
+	at java.awt.EventQueue$1.run(EventQueue.java:606)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.AccessControlContext$1.doIntersectionPrivilege(AccessControlContext.java:105)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:617)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:275)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:200)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:190)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:185)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:177)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:138)
+

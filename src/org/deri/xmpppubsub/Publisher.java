@@ -2,7 +2,7 @@ package org.deri.xmpppubsub;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-
+import java.net.URLDecoder;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -16,7 +16,8 @@ import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
-
+import com.tecnick.htmlutils.htmlentities.HTMLEntities;
+import org.apache.commons.lang3.StringEscapeUtils;
 //import com.javacodegeeks.xmpp.XmppManager;
 
 /**
@@ -172,13 +173,32 @@ public class Publisher {
 	    // LeafNode node = p.createNode("testNodeWithPayloadU2");
 		
 	    // Get triples to send
+	    
+	    
 	    //String triples = get_triples(fileName);
 	    //triples = "INSERT INTO &lt;http://mygraph&gt; {"+triples+"}";
 	    //triples = "PREFIX dc: <http://purl.org/dc/elements/1.1/> INSERT DATA INTO <http://example/bookStore> { <http://example/book3>  dc:title  'Fundamentals of Compiler Desing' }";
-	    String triples = "<title>book6</title>";
+
 	    
-		String payloadXmlWithNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>"+triples+"</query>";	  	    
-		SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/2005/09/xmpp-sparql-binding", payloadXmlWithNS);
+//		String payloadXmlWithNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>"+triples+"</query>";	  	    
+//		SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/2005/09/xmpp-sparql-binding", payloadXmlWithNS);
+//	    String triples = "<title>book6</title>";
+//	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/2005/09/xmpp-sparql-binding", triples);
+
+	    String beginNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>";
+	    String endNS = "</query>";
+    	String triples = "PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+//	    String query = HTMLEntities.htmlAngleBrackets(triples);
+//    	String query = StringEscapeUtils.escapeHtml4(triples);
+//    	triples = StringEscapeUtils.escapeHtml4(triples);
+//    	String query = URLDecoder.decode(triples, "UTF-8");
+//    	String query = "<![CDATA["+triples+"]]>";
+//	    String query = beginNS + triples + endNS;
+    	String query = beginNS+"<![CDATA["+triples+"]]>"+endNS;
+    	System.out.println(query);
+	    logger.debug(query);
+    	
+	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
 	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(testid, payloadNS);
 	    node.send(item);
 	    
