@@ -19,6 +19,7 @@ import org.apache.log4j.BasicConfigurator;
 import com.tecnick.htmlutils.htmlentities.HTMLEntities;
 import org.apache.commons.lang3.StringEscapeUtils;
 //import com.javacodegeeks.xmpp.XmppManager;
+import org.deri.xmpppubsub.SPARQLQuery;
 
 /**
  * @author Maciej Dabrowski
@@ -55,11 +56,11 @@ public class Publisher {
 	    connection = new XMPPConnection(config);
 	    connection.connect();
 	    connection.login(userName, password);
-	    logger.debug("logued in");
+	    logger.info("logued in");
 
 		//Create a pubsub manager using an existing Connection
 		mgr = new PubSubManager(connection);
-		logger.debug("manager created");
+		logger.info("PubSub manager created");
     }
 
     /**
@@ -68,6 +69,7 @@ public class Publisher {
      */
     public void disconnect() {
     	connection.disconnect();
+		logger.info("disconected");
     }
 
 
@@ -83,7 +85,7 @@ public class Publisher {
 		form.setPersistentItems(true);
 		form.setPublishModel(PublishModel.open);
 		LeafNode leaf = (LeafNode) mgr.createNode(nodename, form);
-		logger.debug("node created");
+		logger.info("node created");
     	return leaf;
     }
 
@@ -94,7 +96,7 @@ public class Publisher {
      */
     public LeafNode getNode(String nodename) throws XMPPException {
 		LeafNode node = (LeafNode) mgr.getNode(nodename);
-		logger.debug("got node");
+		logger.info("node got");
 		return node;
     }
 
@@ -103,8 +105,17 @@ public class Publisher {
      * @return void 
      *
      */
-    public void send_payload() {
-    	
+    public void sendPayload(LeafNode node, SPARQLQuery query) {
+    	String itemid = "test" + System.currentTimeMillis();
+	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query.toXML());
+	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(itemid, payloadNS);
+    	try {
+    		node.send(item);
+    	} catch (XMPPException e) {
+    		logger.debug("exception sending payload");
+		    e.printStackTrace();
+		    logger.debug(e);
+    	}
     }
 
     /**
@@ -112,7 +123,7 @@ public class Publisher {
      * @return String
      *
      */
-    public static String get_triples(String fileName) {
+    public static String getRDFFromFile(String fileName) {
     	logger.debug("Reading from file.");
     	try {
     	    BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -157,10 +168,7 @@ public class Publisher {
 		String xmppserver = "vmuss12.deri.ie";
 		int port = 5222;
 		String fileName = "src/org/deri/xmpppubsub/data/deri.ie.rdf";
-		String testid = "test" + System.currentTimeMillis();
-		//String namespace = "http://jabber.org/protocol/pubsub";
-		//String payloadXmlWithNS = "<book xmlns='pubsub:test:book'><author name='Stephen King'/></book>";
-  
+		
 	    // turn on the enhanced debugger
 	    XMPPConnection.DEBUG_ENABLED = true;
 	 
@@ -176,34 +184,11 @@ public class Publisher {
 	    
 	    
 	    //String triples = get_triples(fileName);
-	    //triples = "INSERT INTO &lt;http://mygraph&gt; {"+triples+"}";
-	    //triples = "PREFIX dc: <http://purl.org/dc/elements/1.1/> INSERT DATA INTO <http://example/bookStore> { <http://example/book3>  dc:title  'Fundamentals of Compiler Desing' }";
-
-	    
-//		String payloadXmlWithNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>"+triples+"</query>";	  	    
-//		SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/2005/09/xmpp-sparql-binding", payloadXmlWithNS);
-//	    String triples = "<title>book6</title>";
-//	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/2005/09/xmpp-sparql-binding", triples);
-
-	    String beginNS = "<query xmlns='http://www.w3.org/2005/09/xmpp-sparql-binding'>";
-	    String endNS = "</query>";
-    	String triples = "PREFIX dc:<http://purl.org/dc/elements/1.1/> INSERT DATA <http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
-//	    String query = HTMLEntities.htmlAngleBrackets(triples);
-//    	String query = StringEscapeUtils.escapeHtml4(triples);
-//    	triples = StringEscapeUtils.escapeHtml4(triples);
-//    	String query = URLDecoder.decode(triples, "UTF-8");
-//    	String query = "<![CDATA["+triples+"]]>";
-//	    String query = beginNS + triples + endNS;
-    	String query = beginNS+"<![CDATA["+triples+"]]>"+endNS;
-    	System.out.println(query);
-	    logger.debug(query);
+    	String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+    	SPARQLQuery query = new SPARQLQuery("insert", triples);
     	
-	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
-	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(testid, payloadNS);
-	    node.send(item);
+    	p.sendPayload(node, query);
 	    
-//		node.send(new PayloadItem("test" + System.currentTimeMillis(), 
-//				new SimplePayload("book4", "pubsub:test:book", "<title>book6</title>")));
 		logger.info("query sent");
 		
 		//p.disconnect();
