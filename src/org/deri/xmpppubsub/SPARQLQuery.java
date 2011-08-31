@@ -1,6 +1,19 @@
 package org.deri.xmpppubsub;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
+import org.deri.any23.Any23;
+import org.deri.any23.extractor.ExtractionException;
+import org.deri.any23.source.DocumentSource;
+import org.deri.any23.source.FileDocumentSource;
+import org.deri.any23.source.StringDocumentSource;
+import org.deri.any23.writer.NTriplesWriter;
+import org.deri.any23.writer.TripleHandler;
+
 import com.tecnick.htmlutils.htmlentities.HTMLEntities;
 import org.apache.commons.lang3.StringEscapeUtils;
 /**
@@ -13,15 +26,15 @@ public class SPARQLQuery {
     String endNS = "</query>";
     
     //constants for testing
-    String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+    String triplesSource = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
     String prefixes = "PREFIX dc:<http://purl.org/dc/elements/1.1/>";
-
+    String triples;
 	String query;
     String queryxml;
 
-	public SPARQLQuery(String method, String triples) {
+	public SPARQLQuery(String method, String triplesSource) throws IOException, ExtractionException {
 		//convert any serialized rdf to triples
-		
+		triples = source23(triplesSource);
 		//how to get the prefixes?
 		
 		
@@ -33,14 +46,29 @@ public class SPARQLQuery {
 		} else if (method == "update") {
 			query = "UPDATE DATA "+triples;
 		}
-		query = prefixes + query;
+//		query = prefixes + query;
 		
 		//toXML
 	}
 	
-	public void any23triples(String url) {
+	public String source23(String triplesSource) throws IOException, ExtractionException {
 		//String anyquery = "http://any23.org/best/"+url;
 		//triples = url;
+        Any23 runner = new Any23();
+        // The second argument of StringDocumentSource() must be a valid URI.
+//        try {
+//            DocumentSource source = new FileDocumentSource(triplesSource);
+//        } catch (){
+//            String content = "";
+//            DocumentSource source = new StringDocumentSource(content, triplesSource);
+//        }
+        File file = new File("org/deri/xmpppubsub/data/"+triplesSource);
+        DocumentSource source = new FileDocumentSource(file);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        TripleHandler handler = new NTriplesWriter(out);
+        runner.extract(source, handler);
+        String n3 = out.toString("UTF-8");
+        return n3;
 	}
 	public void decodeEntities() {
 //    	query = URLDecoder.decode(triples, "UTF-8");//

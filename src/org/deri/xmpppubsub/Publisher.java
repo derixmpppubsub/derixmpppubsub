@@ -1,8 +1,13 @@
 package org.deri.xmpppubsub;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLDecoder;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -17,7 +22,9 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 import com.tecnick.htmlutils.htmlentities.HTMLEntities;
-import org.apache.commons.lang3.StringEscapeUtils;
+//import org.apache.commons.configuration.Configuration;
+//import org.apache.commons.configuration.ConfigurationException;
+//import org.apache.commons.configuration.PropertiesConfiguration;
 //import com.javacodegeeks.xmpp.XmppManager;
 import org.deri.xmpppubsub.SPARQLQuery;
 
@@ -85,7 +92,7 @@ public class Publisher {
 		form.setPersistentItems(true);
 		form.setPublishModel(PublishModel.open);
 		LeafNode leaf = (LeafNode) mgr.createNode(nodename, form);
-		logger.info("node created");
+		logger.info("node" + nodename  + "created");
     	return leaf;
     }
 
@@ -97,6 +104,20 @@ public class Publisher {
     public LeafNode getNode(String nodename) throws XMPPException {
 		LeafNode node = (LeafNode) mgr.getNode(nodename);
 		logger.info("node got");
+		return node;
+    }
+
+    /**
+     * @return void 
+     *
+     */
+    public LeafNode getOrCreateNode(String nodename) throws XMPPException {
+    	LeafNode node;
+    	try {
+    		node = (LeafNode) mgr.getNode(nodename);
+    	} catch (Exception e){
+    		node = createNode(nodename);
+    	}
 		return node;
     }
 
@@ -117,83 +138,100 @@ public class Publisher {
 		    logger.debug(e);
     	}
     }
-
-    /**
-     * @param fileName
-     * @return String
-     *
-     */
-    public static String getRDFFromFile(String fileName) {
-    	logger.debug("Reading from file.");
-    	try {
-    	    BufferedReader br = new BufferedReader(new FileReader(fileName));
-        	StringBuilder sb = new StringBuilder();
-    	    String line = br.readLine();
-    	    while (line != null) {
-    	    	sb.append(line + "\n");
-    	    	line = br.readLine();
-	        	}
-	        	br.close();
-	        	return sb.toString();
-    	} catch (IOException e) {
-		      e.printStackTrace();
-		      logger.debug(fileName);
-		      logger.debug(e);
-		      return "";
-    	}
-    }
     
 	/**
 	 * @param args
-	 * @TODO refactorize exceptions
-	 * @TODO disconnect on exception
-	 * @TODO manage arguments
-	 * @TODO manage/create config file
-	 * @TODO separate xmpp login in other class?
-	 * @TODO separate create node in other executable or new function getOrCreateNode?
-	 * @TODO what exactly we want to send?, a sparql query to the server, that will not be answered to the publisher but to the subscribers?, raw data?, rdf?, which serialization?
-	 * @TODO in case sending sparql query, needed encode xml entities
-	 * @TODO publisher should get data from sparql endpoint instead file?
+	 * TODO fix exception, methods, variables... to follow the java style
+	 * TODO when to disconnect
+	 * TODO manage arguments
+	 * 
+	 * TODO separate xmpp login in other class?, inherit publisher and subscriber from a common class that has the methods connect and getNode?
+	 * TODO separate create node in other executable or new function getOrCreateNode?
+	 * 
+	 * TODO why the xml formatting error in the sparql query, even scaping xml entities?
+	 * TODO extend method to get triples from sparql endpoint instead of only file
 	 */
-	public static void main(String[] args) throws XMPPException, IOException {
+	public static void main(String[] args){
 
-	    // Set up a simple configuration that logs on the console.
-	    BasicConfigurator.configure();
-	    //logger.setLevel(Level.DEBUG);
-	    logger.info("Entering application.");
-	    
-	    // declare variables
-		String username = "testuser2";
-		String password = "testuser2pass";
-		String xmppserver = "vmuss12.deri.ie";
-		int port = 5222;
-		String fileName = "src/org/deri/xmpppubsub/data/deri.ie.rdf";
+        try {
+    	    // Set up a simple configuration that logs on the console.
+    	    BasicConfigurator.configure();
+    	    //logger.setLevel(Level.DEBUG);
+    	    logger.info("Entering application.");
+    
+            // turn on the enhanced debugger
+            XMPPConnection.DEBUG_ENABLED = true;
+        
+            // Using a properties file
+            
+//	    	Configuration config = new PropertiesConfiguration("./xmpppubsub.properties");
+//		    // declare variables
+//			String username = config.getString("username");
+//			String password = config.getString("password");
+//			String xmppserver = config.getString("xmppserver");
+//			int port = config.getInt("port");
+	        
+	        Properties prop = new Properties();
+	        File file = new File("config/xmpppubsub.properties");
+	        String filePath = file.getCanonicalPath();
+	        logger.debug(filePath);
+	        InputStream is = new FileInputStream(filePath);
+	        prop.load(is);
+	        String username = prop.getProperty("username");  
+            String password = prop.getProperty("password");
+            String xmppserver = prop.getProperty("xmppserver");
+            int port = Integer.parseInt(prop.getProperty("port")); 
+            logger.debug(xmppserver);
+            logger.debug(port);
 		
-	    // turn on the enhanced debugger
-	    XMPPConnection.DEBUG_ENABLED = true;
-	 
-	    Publisher p = new Publisher(username, password, xmppserver, port);
-	    
-		// Get the node
-	    LeafNode node = p.getNode("testNodeWithPayloadU2");
+			String usage = "Publisher method triples";
+			String exampleusage = "insert \"<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .\" testNodeWithPayloadU2";
+	    	String method = args[0];
+	    	String triplesSource = args[1];
+	    	String nodeName = args[2];
+            logger.debug(triplesSource);
+            logger.debug(nodeName);
+            logger.debug(args.length);
+
+//            String username = "testuser3";
+//            String password = "testuser3pass";
+//            String xmppserver = "vmuss12.deri.ie";
+//            int port = 5222;
+//            String nodeName = "testNodeWithPayloadU2";
+//            String method = "insert";
+		 
+		    Publisher p = new Publisher(username, password, xmppserver, port);
+		    
+			// Get the node
+		    LeafNode node = p.getOrCreateNode(nodeName);
+		    
+		    
+		    //String triples = get_triples(fileName);
+	    	//String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+	    	SPARQLQuery query = new SPARQLQuery(method, triplesSource);
+	    	
+	    	p.sendPayload(node, query);
+		    
+			logger.info("query sent");
 			
-		// Create the node
-	    // LeafNode node = p.createNode("testNodeWithPayloadU2");
-		
-	    // Get triples to send
-	    
-	    
-	    //String triples = get_triples(fileName);
-    	String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
-    	SPARQLQuery query = new SPARQLQuery("insert", triples);
-    	
-    	p.sendPayload(node, query);
-	    
-		logger.info("query sent");
-		
-		//p.disconnect();
-
-	    //System.exit(0);
+			//p.disconnect();
+	
+		    //System.exit(0);
+//	    } catch(ConfigurationException e) {
+//		    e.printStackTrace();
+//		    logger.debug(e);
+//	    	
+	    } catch(XMPPException e) {
+		    e.printStackTrace();
+		    logger.debug(e);
+	    	
+//	    } catch(IOException  e) {
+	    	
+	    } catch(Exception e) {
+		    e.printStackTrace();
+		    logger.debug(e);
+	    	
+	    }
 		
 	}
 }
