@@ -1,11 +1,15 @@
 package org.deri.xmpppubsub;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLDecoder;
+import org.apache.log4j.Logger;
+import org.apache.log4j.BasicConfigurator;
+
 import org.deri.any23.Any23;
 import org.deri.any23.extractor.ExtractionException;
 import org.deri.any23.source.DocumentSource;
@@ -26,20 +30,20 @@ public class SPARQLQuery {
     String endNS = "</query>";
     
     //constants for testing
-    String triplesSource = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
-    String prefixes = "PREFIX dc:<http://purl.org/dc/elements/1.1/>";
+//    String triplesSource = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+//    String prefixes = "PREFIX dc:<http://purl.org/dc/elements/1.1/>";
     String triples;
 	String query;
     String queryxml;
+    static Logger logger = Logger.getLogger(SPARQLQuery.class);
 
 	public SPARQLQuery(String method, String triplesSource) throws IOException, ExtractionException {
 		//convert any serialized rdf to triples
-		triples = source23(triplesSource);
-		//how to get the prefixes?
-		
-		
+//		triples = source23(triplesSource);
+	    triples = getn3FromFile(triplesSource);
+		logger.debug(triples);
 		//create the query
-		if (method == "insert") {
+		if (method.equals("insert")) {
 			query = "INSERT DATA "+triples;
 		} else if (method == "delete") {
 			query = "DELETE DATA "+triples;
@@ -47,13 +51,57 @@ public class SPARQLQuery {
 			query = "UPDATE DATA "+triples;
 		}
 //		query = prefixes + query;
-		
+		logger.debug(query);
 		//toXML
 	}
-	
+
+    public static String getn3FromFile(String fileName) throws IOException{
+        logger.debug("Reading from file.");
+        
+//        File f = new File("C:\\test.txt");
+//        FileReader fr = new FileReader(f);
+//        BufferedReader br = new BufferedReader(fr);
+//        StringBuffer sb = new StringBuffer();
+//        String eachLine = br.readLine();
+        
+        
+//        File file = new File("config/xmpppubsub.properties");
+//        String filePath = file.getCanonicalPath();
+//        logger.debug(filePath);
+//        InputStream is = new FileInputStream(filePath);
+        
+        
+//        FileInputStream fis = new FileInputStream("test.txt"); 
+//        InputStreamReader in = new InputStreamReader(fis, "UTF-8");
+
+        File f = new File("src/org/deri/xmpppubsub/data/"+fileName);
+        String filePath = f.getCanonicalPath();
+        logger.debug(filePath);
+        FileReader fr = new FileReader(filePath);
+        BufferedReader br = new BufferedReader(fr);
+        StringBuilder sb = new StringBuilder();
+        
+        String line = br.readLine();
+        while (line != null) {
+            logger.debug(line);
+            sb.append(line + "\n");
+            line = br.readLine();
+        }
+        br.close();
+        
+        logger.debug(sb.toString());
+        return sb.toString();
+    }
+    
 	public String source23(String triplesSource) throws IOException, ExtractionException {
 		//String anyquery = "http://any23.org/best/"+url;
 		//triples = url;
+	    
+	    // TODO: solve 
+	    //Exception in thread "main" java.lang.NoClassDefFoundError: org/slf4j/LoggerFactory
+	    //at org.deri.any23.configuration.DefaultConfiguration.<clinit>(DefaultConfiguration.java:44)
+	    //at org.deri.any23.Any23.<clinit>(Any23.java:67)
+	    
         Any23 runner = new Any23();
         // The second argument of StringDocumentSource() must be a valid URI.
 //        try {
@@ -78,6 +126,8 @@ public class SPARQLQuery {
 	}
 	public String toXML(){
 		//testing in different ways
+        logger.debug("query attr inside toXML");
+        logger.debug(query);
     	queryxml = beginNS+"<![CDATA["+query+"]]>"+endNS;
     	System.out.println(queryxml);
 		return queryxml;
@@ -92,8 +142,26 @@ public class SPARQLQuery {
 	public String toXMLDecodingEntitiesCDATA(){
 		//testing in different ways
 		decodeEntities();
-    	queryxml = beginNS+"<![CDATA["+query+"]]>"+endNS;
+    	queryxml = beginNS+"<![CDATA[ "+query+" ]]>"+endNS;
     	System.out.println(queryxml);
 		return queryxml;
 	}
+    public static void main(String[] args){
+        //main method for testing
+        try {
+            // Set up a simple configuration that logs on the console.
+            BasicConfigurator.configure();
+            
+            String triplesSource = "example.n3";
+            String method = "insert";
+            SPARQLQuery query = new SPARQLQuery(method, triplesSource);
+            System.out.println(query.toXML());
+        } catch (IOException e){
+            e.printStackTrace();
+            logger.debug(e);
+        } catch (ExtractionException e){
+            e.printStackTrace();
+            logger.debug(e);
+        }
+    }
 }

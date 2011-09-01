@@ -2,9 +2,16 @@ package org.deri.xmpppubsub;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.deri.any23.extractor.ExtractionException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
+
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -84,20 +91,32 @@ public class Subscriber {
 		    BasicConfigurator.configure();
 		    //logger.setLevel(Level.DEBUG);
 		    logger.info("Entering application.");
-		    
-		    // declare variables
-			String username = "testuser3";
-			String password = "testuser3pass";
-			String xmppserver = "vmuss12.deri.ie";
-			int port = 5222;
 			
 		    // turn on the enhanced debugger
 		    XMPPConnection.DEBUG_ENABLED = true;
-		 
+
+            Properties prop = new Properties();
+            File file = new File("config/subscriber.properties");
+            String filePath = file.getCanonicalPath();
+            InputStream is = new FileInputStream(filePath);
+            prop.load(is);
+            String username = prop.getProperty("username");  
+            String password = prop.getProperty("password");
+            String xmppserver = prop.getProperty("xmppserver");
+            int port = Integer.parseInt(prop.getProperty("port")); 
+            logger.debug(xmppserver);
+            logger.debug(port);
+        
+            String usage = "Subscriber node <outputfile>";
+            String exampleusage = "testNodeWithPayloadU2";
+
+            String nodeName = args[0];
+//            String outputfile = args[1];
+            
 		    Subscriber p = new Subscriber(username, password, xmppserver, port);
 		    
 			// Get the node
-		    LeafNode node = p.getNode("testNodeWithPayloadU2");
+		    LeafNode node = p.getNode(nodeName);
 			
 			node.addItemEventListener(new ItemEventCoordinator());
 		//	node.subscribe("testuser3@vmuss12.deri.ie");
@@ -134,7 +153,15 @@ public class Subscriber {
 			
 		} catch (XMPPException e) {
 			e.printStackTrace();
-		}
+        
+        } catch(IOException e) {
+            e.printStackTrace();
+            logger.debug(e);
+        }
+//        } catch (ExtractionException e) {
+//            e.printStackTrace();
+//            logger.debug(e);
+//        }
 		
 //		xmppManager.setStatus(true, "Hello everyone");
 //		xmppManager.destroy();

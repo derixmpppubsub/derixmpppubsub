@@ -1,11 +1,8 @@
 package org.deri.xmpppubsub;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URLDecoder;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -21,11 +18,11 @@ import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
-import com.tecnick.htmlutils.htmlentities.HTMLEntities;
 //import org.apache.commons.configuration.Configuration;
 //import org.apache.commons.configuration.ConfigurationException;
 //import org.apache.commons.configuration.PropertiesConfiguration;
 //import com.javacodegeeks.xmpp.XmppManager;
+import org.deri.any23.extractor.ExtractionException;
 import org.deri.xmpppubsub.SPARQLQuery;
 
 /**
@@ -126,17 +123,11 @@ public class Publisher {
      * @return void 
      *
      */
-    public void sendPayload(LeafNode node, SPARQLQuery query) {
+    public void sendPayload(LeafNode node, String query) throws XMPPException {
     	String itemid = "test" + System.currentTimeMillis();
-	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query.toXML());
+	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
 	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(itemid, payloadNS);
-    	try {
-    		node.send(item);
-    	} catch (XMPPException e) {
-    		logger.debug("exception sending payload");
-		    e.printStackTrace();
-		    logger.debug(e);
-    	}
+    	node.send(item);
     }
     
 	/**
@@ -149,13 +140,14 @@ public class Publisher {
 	 * TODO separate create node in other executable or new function getOrCreateNode?
 	 * 
 	 * TODO why the xml formatting error in the sparql query, even scaping xml entities?
-	 * TODO extend method to get triples from sparql endpoint instead of only file
+	 * TODO extend method to get triples from sparql endpoint instead of only file?
 	 */
 	public static void main(String[] args){
 
         try {
     	    // Set up a simple configuration that logs on the console.
     	    BasicConfigurator.configure();
+    	    
     	    //logger.setLevel(Level.DEBUG);
     	    logger.info("Entering application.");
     
@@ -185,20 +177,16 @@ public class Publisher {
             logger.debug(port);
 		
 			String usage = "Publisher method triples";
-			String exampleusage = "insert \"<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .\" testNodeWithPayloadU2";
+//			String exampleusage = "insert \"<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .\" testNodeWithPayloadU2";
+            String exampleusage = "insert example.ttl testNodeWithPayloadU2";
+
 	    	String method = args[0];
 	    	String triplesSource = args[1];
 	    	String nodeName = args[2];
+            logger.debug(method);
             logger.debug(triplesSource);
             logger.debug(nodeName);
             logger.debug(args.length);
-
-//            String username = "testuser3";
-//            String password = "testuser3pass";
-//            String xmppserver = "vmuss12.deri.ie";
-//            int port = 5222;
-//            String nodeName = "testNodeWithPayloadU2";
-//            String method = "insert";
 		 
 		    Publisher p = new Publisher(username, password, xmppserver, port);
 		    
@@ -209,29 +197,27 @@ public class Publisher {
 		    //String triples = get_triples(fileName);
 	    	//String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
 	    	SPARQLQuery query = new SPARQLQuery(method, triplesSource);
-	    	
-	    	p.sendPayload(node, query);
+	    	logger.debug(query.toXML());
+	    	p.sendPayload(node, query.toXML());
 		    
 			logger.info("query sent");
 			
 			//p.disconnect();
 	
 		    //System.exit(0);
-//	    } catch(ConfigurationException e) {
-//		    e.printStackTrace();
-//		    logger.debug(e);
-//	    	
+			
 	    } catch(XMPPException e) {
 		    e.printStackTrace();
 		    logger.debug(e);
 	    	
-//	    } catch(IOException  e) {
-	    	
-	    } catch(Exception e) {
+	    } catch(IOException e) {
 		    e.printStackTrace();
 		    logger.debug(e);
 	    	
-	    }
+	    } catch (ExtractionException e) {
+            e.printStackTrace();
+            logger.debug(e);
+        }
 		
 	}
 }
