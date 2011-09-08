@@ -17,15 +17,16 @@ public class ItemEventCoordinator implements ItemEventListener {
     static Logger logger = Logger.getLogger(ItemEventCoordinator.class);
 	
 	public void handlePublishedItems(ItemPublishEvent items){
-		System.out.println("Item count: " + items.getItems().size());
-		
-		List its = items.getItems();
+		//System.out.println("Item count: " + items.getItems().size());
+				
+		List<ItemPublishEvent> its = items.getItems();
 		
 		Iterator itr = its.iterator();
 		
 		while (itr.hasNext()){
-			Item it = (Item) itr.next();
-			System.out.println(it.toXML());
+			Item item = (Item) itr.next();
+			logger.info("item received: " + item.toXML());
+			//TODO: put data into the RDF store
 		}
 		
 	}

@@ -1,9 +1,5 @@
 package org.deri.xmpppubsub;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.deri.any23.extractor.ExtractionException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -118,6 +116,7 @@ public class Subscriber {
 			// Get the node
 		    LeafNode node = p.getNode(nodeName);
 			
+		    // add item event listener
 			node.addItemEventListener(new ItemEventCoordinator());
 		//	node.subscribe("testuser3@vmuss12.deri.ie");
 			
