@@ -107,7 +107,7 @@ public class SPARQLQuery {
 	 */
 	public SPARQLQuery(String triples) throws IOException, ExtractionException,
 			QueryTypeException {
-		this(defaultQueryType, triples);
+		query = wrapTriples(defaultQueryType, triples);
 	}
 
 	/**

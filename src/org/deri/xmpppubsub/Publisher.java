@@ -28,7 +28,7 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 public class Publisher {
     
 	private XMPPConnection connection;
-    private PubSubManager mgr;
+    public PubSubManager mgr;
     
     //TODO: move to properties?
     // default XMPP server port 
@@ -206,7 +206,7 @@ public class Publisher {
 //			int port = config.getInt("port");
 	        
 	        Properties prop = new Properties();
-	        File file = new File("config/xmpppubsub.properties");
+	        File file = new File("xmpppubsub.properties");
 	        String filePath = file.getCanonicalPath();
 	        logger.debug(filePath);
 	        InputStream is = new FileInputStream(filePath);
@@ -219,28 +219,33 @@ public class Publisher {
             logger.debug(port);
 		
 			String usage = "Publisher method triples";
-//			String exampleusage = "insert \"<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .\" testNodeWithPayloadU2";
-            String exampleusage = "insert example.ttl testNodeWithPayloadU2";
+			//String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+			String triples = "test dupa dupa2";
+//            String exampleusage = "insert example.ttl testNodeWithPayloadU2";
 
-	    	String method = args[0];
-	    	String triplesSource = args[1];
-	    	String nodeName = args[2];
+	    	String method = "insert";
+	    	
+	    	//String triplesSource = args[1];
+	    	    	String nodeName = "twoSubscribers";
             logger.debug(method);
-            logger.debug(triplesSource);
+            //logger.debug(triplesSource);
             logger.debug(nodeName);
             logger.debug(args.length);
 		 
 		    Publisher p = new Publisher(username, password, xmppserver, port);
-		    
+	//	    p.mgr.deleteNode("twoSubscribers");		    
 			// Get the node
 		    LeafNode node = p.getOrCreateNode(nodeName);
 		    
 		    
 		    //String triples = get_triples(fileName);
 	    	//String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
-	    	SPARQLQuery query = new SPARQLQuery(SPARQLQueryType.valueOf(method.toUpperCase()), triplesSource);
-	    	logger.debug(query.toXML());
-	    	p.publish(node, query.toXML());
+	    	//SPARQLQuery query = new SPARQLQuery(SPARQLQueryType.valueOf(method.toUpperCase()), triplesSource);
+		    SPARQLQuery query = new SPARQLQuery(triples);
+	    	//logger.debug(query.toXML());
+	    	//p.publish(node, query.toXML());
+		    logger.debug(query.toXMLDecodingEntitiesCDATA());
+		    p.publish(node, query.toXMLDecodingEntitiesCDATA());
 		    
 			logger.info("query sent");
 			

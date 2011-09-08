@@ -94,7 +94,7 @@ public class Subscriber {
 		    XMPPConnection.DEBUG_ENABLED = true;
 
             Properties prop = new Properties();
-            File file = new File("config/subscriber.properties");
+            File file = new File("subscriber.properties");
             String filePath = file.getCanonicalPath();
             InputStream is = new FileInputStream(filePath);
             prop.load(is);
@@ -108,16 +108,24 @@ public class Subscriber {
             String usage = "Subscriber node <outputfile>";
             String exampleusage = "testNodeWithPayloadU2";
 
-            String nodeName = args[0];
+        //    String nodeName = args[0];
+          String  nodeName = "twoSubscribers";
 //            String outputfile = args[1];
             
 		    Subscriber p = new Subscriber(username, password, xmppserver, port);
+		    Subscriber p3 = new Subscriber("testuser4", "testuser4pass", xmppserver, port);
+		    
 		    
 			// Get the node
 		    LeafNode node = p.getNode(nodeName);
+		    LeafNode node3 = p3.getNode(nodeName);
 			
+		    node.subscribe(username + "@vmuss12.deri.ie");
+		    node3.subscribe("testuser4@vmuss12.deri.ie");
+		    
 		    // add item event listener
 			node.addItemEventListener(new ItemEventCoordinator());
+			node3.addItemEventListener(new ItemEventCoordinator());
 		//	node.subscribe("testuser3@vmuss12.deri.ie");
 			
 		
@@ -135,13 +143,13 @@ public class Subscriber {
 				//node.unsubscribe(sub.getJid());
 			}
 			
-			List its = node.getItems(5);
+			List its = node.getItems(1);
 			
 			Iterator itr = its.iterator();
 			
 			while (itr.hasNext()){
 				Item it = (Item) itr.next();
-				System.out.println(it.toXML());
+				System.out.println(it.toString());
 			}
 			
 			boolean isRunning = true;
