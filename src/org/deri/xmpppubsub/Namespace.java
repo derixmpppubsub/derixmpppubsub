@@ -27,6 +27,9 @@ public class Namespace {
         namespace.put("dbpedia2", "http://dbpedia.org/property/"); 
         namespace.put("dbpedia", "http://dbpedia.org/");
     }
+    public String namespace(String prefixName) {
+        return namespace.get(prefixName);
+    }
     public String prefix(String prefixName) {
         // FIXME namespace is the prefix name or the actual namespace?
         return "PREFIX "+ prefixName + ": <" + namespace.get(prefixName) + ">";
