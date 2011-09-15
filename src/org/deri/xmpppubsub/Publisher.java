@@ -29,10 +29,11 @@ public class Publisher {
     
 	private XMPPConnection connection;
     public PubSubManager mgr;
-    
-    //TODO: move to properties?
-    // default XMPP server port 
-    private int defaultXmppPort = 5222; 
+    public String userName;
+    public String password;
+    public String domain;
+    public int port;
+    public LeafNode node;
     
     static Logger logger = Logger.getLogger(Publisher.class);
     
@@ -44,8 +45,17 @@ public class Publisher {
      * @return void 
      *
      */
+
+    public Publisher(String userName, String password, String xmppserver) throws XMPPException {
+        this(userName, password, xmppserver, 5222);
+    }
+    
     public Publisher(String userName, String password, String xmppserver, int port) throws XMPPException {
-    	connect(userName, password, xmppserver, port); 	
+    	this.userName = userName;
+        this.password = password;
+        this.domain = xmppserver;
+        this.port = port;
+        initPubSub(); 	
     }
 
     /**
@@ -56,10 +66,9 @@ public class Publisher {
      * @param xmppServer
      * @throws XMPPException
      */
-    public Publisher(String userName, String password, String xmppServer) throws XMPPException {
-    	connect (userName, password, xmppServer, defaultXmppPort);
-    	logger.info("created publisher for user " + userName);
-    }
+//    public Publisher(String userName, String password, String xmppServer) throws XMPPException {
+//        Publisher(userName, password, xmppServer, defaultXmppPort);
+//    }
     
     /**
      * @param userName
@@ -69,17 +78,13 @@ public class Publisher {
      * @return void 
      *
      */
-    public void connect(String userName, String password, String xmppServer, int port) throws XMPPException {
-	 
-    	ConnectionConfiguration config = new ConnectionConfiguration(xmppServer,port);
-    	
+    public void initPubSub() throws XMPPException {
+    	ConnectionConfiguration config = new ConnectionConfiguration(domain,port);
 	    connection = new XMPPConnection(config);
 	    connection.connect();
 	    connection.login(userName, password);
-	    
 	    logger.info("User " + userName + " logged in to the server " 
-	            + xmppServer);
-
+	            + domain);
 		//Create a pubsub manager using an existing Connection
 		mgr = new PubSubManager(connection);
 		logger.info("PubSub manager created");
@@ -115,17 +120,13 @@ public class Publisher {
 		form.setNotifyRetract(true);
 		form.setPersistentItems(true);
 		form.setPublishModel(PublishModel.open);
-		LeafNode leaf = (LeafNode) mgr.createNode(nodename, form);
+		node = (LeafNode) mgr.createNode(nodename, form);
 		logger.info("node " + nodename  + " created");
-    	return leaf;
+    	return node;
     }
 
-    /**
-     * @return void 
-     *
-     */
     public LeafNode getNode(String nodename) throws XMPPException {
-		LeafNode node = (LeafNode) mgr.getNode(nodename);
+		node = (LeafNode) mgr.getNode(nodename);
 		logger.info("node" + nodename  + "got");
 		return node;
     }
@@ -135,11 +136,10 @@ public class Publisher {
      *
      */
     public LeafNode getOrCreateNode(String nodename) throws XMPPException {
-    	LeafNode node;
     	try {
-    		node = (LeafNode) mgr.getNode(nodename);
+    		node = this.getNode(nodename);
     	} catch (Exception e){
-    		node = createNode(nodename);
+    		node = this.createNode(nodename);
     	}
 		return node;
     }
@@ -149,31 +149,13 @@ public class Publisher {
      * @return void 
      *
      */
-    public void publish(LeafNode node, String query) throws XMPPException {
+    public void publishQuery(String query) throws XMPPException {
     	String itemID = connection.getUser() + System.currentTimeMillis();
 	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
 	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(itemID, payloadNS);
 	    node.send(item);
     }
     
-    /**
-     * Send query through the default node
-     * 
-     * @param query
-     * @throws XMPPException
-     */
-    public void publish(String query) throws XMPPException{
-    	LeafNode node;
-    	if(connection.isAuthenticated())
-    		node = getOrCreateNode(connection.getUser());
-    	else
-    		throw new XMPPException("Not logged in!");
-    	
-    	String itemID = connection.getUser() + System.currentTimeMillis();
-    	SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
-	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(itemID, payloadNS);
-	    node.send(item);
-    }
     
 	/**
 	 * @param args
@@ -215,8 +197,6 @@ public class Publisher {
             String password = prop.getProperty("password");
             String xmppserver = prop.getProperty("xmppserver");
             int port = Integer.parseInt(prop.getProperty("port")); 
-            logger.debug(xmppserver);
-            logger.debug(port);
 		
 			String usage = "Publisher method triples";
 			//String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
@@ -226,7 +206,7 @@ public class Publisher {
 	    	String method = "insert";
 	    	
 	    	//String triplesSource = args[1];
-	    	    	String nodeName = "twoSubscribers";
+	    	String nodeName = "twoSubscribers";
             logger.debug(method);
             //logger.debug(triplesSource);
             logger.debug(nodeName);
@@ -235,7 +215,7 @@ public class Publisher {
 		    Publisher p = new Publisher(username, password, xmppserver, port);
 	//	    p.mgr.deleteNode("twoSubscribers");		    
 			// Get the node
-		    LeafNode node = p.getOrCreateNode(nodeName);
+		    p.getOrCreateNode(nodeName);
 		    
 		    
 		    //String triples = get_triples(fileName);
@@ -245,7 +225,7 @@ public class Publisher {
 	    	//logger.debug(query.toXML());
 	    	//p.publish(node, query.toXML());
 		    logger.debug(query.toXMLDecodingEntitiesCDATA());
-		    p.publish(node, query.toXMLDecodingEntitiesCDATA());
+		    p.publishQuery(query.toXMLDecodingEntitiesCDATA());
 		    
 			logger.info("query sent");
 			
