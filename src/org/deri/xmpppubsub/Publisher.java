@@ -35,7 +35,7 @@ public class Publisher {
     private int defaultXmppPort = 5222; 
     
     static Logger logger = Logger.getLogger(Publisher.class);
-
+    
     /**
      * @param userName
      * @param password
@@ -58,6 +58,7 @@ public class Publisher {
      */
     public Publisher(String userName, String password, String xmppServer) throws XMPPException {
     	connect (userName, password, xmppServer, defaultXmppPort);
+    	logger.info("created publisher for user " + userName);
     }
     
     /**
@@ -76,7 +77,8 @@ public class Publisher {
 	    connection.connect();
 	    connection.login(userName, password);
 	    
-	    logger.info("User " + userName + " logged in to the server " + xmppServer);
+	    logger.info("User " + userName + " logged in to the server " 
+	            + xmppServer);
 
 		//Create a pubsub manager using an existing Connection
 		mgr = new PubSubManager(connection);
@@ -114,7 +116,7 @@ public class Publisher {
 		form.setPersistentItems(true);
 		form.setPublishModel(PublishModel.open);
 		LeafNode leaf = (LeafNode) mgr.createNode(nodename, form);
-		logger.info("node" + nodename  + "created");
+		logger.info("node " + nodename  + " created");
     	return leaf;
     }
 
@@ -124,7 +126,7 @@ public class Publisher {
      */
     public LeafNode getNode(String nodename) throws XMPPException {
 		LeafNode node = (LeafNode) mgr.getNode(nodename);
-		logger.info("node got");
+		logger.info("node" + nodename  + "got");
 		return node;
     }
 
@@ -179,9 +181,7 @@ public class Publisher {
 	public static void main(String[] args){
 
 		//TODO when to disconnect
-		//TODO manage arguments
 		//TODO separate xmpp login in other class?, inherit publisher and subscriber from a common class that has the methods connect and getNode?
-		//TODO separate create node in other executable or new function getOrCreateNode?
 		//TODO extend method to get triples from sparql endpoint instead of only file? [this is not needed for the component, possible for the evaluation]
 		
 		

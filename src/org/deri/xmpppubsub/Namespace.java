@@ -12,6 +12,7 @@ public class Namespace {
         namespace.put("sioc", "http://rdfs.org/sioc/ns#");
         namespace.put("ctag", "http://commontag.org/ns#");
         namespace.put("ert", "http://www.cisco.com/ert/ns#"); 
+        namespace.put("cisco", "http://www.cisco.com/ert/"); 
         namespace.put("wot", "http://xmlns.com/wot/0.1/");
         namespace.put("dcterms", "http://purl.org/dc/terms/");
         namespace.put("foaf", "http://xmlns.com/foaf/0.1/"); 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -37,8 +38,10 @@ public class Subscriber {
      * @return void 
      *
      */
-    public Subscriber(String userName, String password, String xmppserver, int port) throws XMPPException {
-    	connect(userName, password, xmppserver, port); 	
+    public Subscriber(String userName, String password, String xmppserver, 
+            int port) throws XMPPException {
+    	connect(userName, password, xmppserver, port); 
+        logger.info("created subscriber for user " + userName);	
     }
     
     /**
@@ -49,12 +52,15 @@ public class Subscriber {
      * @return void 
      *
      */
-    public void connect(String userName, String password, String xmppserver, int port) throws XMPPException {
-	    ConnectionConfiguration config = new ConnectionConfiguration(xmppserver,port);
+    public void connect(String userName, String password, String xmppserver, 
+            int port) throws XMPPException {
+	    ConnectionConfiguration config = 
+	        new ConnectionConfiguration(xmppserver,port);
 	    connection = new XMPPConnection(config);
 	    connection.connect();
 	    connection.login(userName, password);
-	    logger.info("logued in");
+        logger.info("User " + userName + " logged in to the server " 
+                + xmppserver);
 
 		//Create a pubsub manager using an existing Connection
 		mgr = new PubSubManager(connection);
@@ -76,10 +82,92 @@ public class Subscriber {
      */
     public LeafNode getNode(String nodename) throws XMPPException {
 		LeafNode node = (LeafNode) mgr.getNode(nodename);
-		logger.info("node got");
+		logger.info("got node "+ nodename);
 		return node;
     }
+    
+    public boolean isSubscribed(LeafNode node, String jid, String xmppserver) 
+            throws XMPPException {
+        logger.debug("isSubscribed");
+        List<? extends Subscription> jidsubs = subscriptionsByJID(node, jid, 
+                xmppserver);
+        if (jidsubs.size() > 0) {
+            logger.debug("jid " + jid + "is subscribed to node " 
+                    + node.getId());
+            return true;
+        } else {
+            logger.debug("jid " + jid + "is not subscribed to node " 
+                    + node.getId());
+            return false;
+        }
+    }
+    
+    
+    public List<? extends Subscription> subscriptionsByJID(LeafNode node, String jid, 
+            String xmppserver) throws XMPPException {
+        logger.debug("subscriptionsByJID");
+        ArrayList<Subscription> jidsubs = new ArrayList<Subscription>();
+        List<? extends Subscription> subs = node.getSubscriptions();
+        logger.debug("number of subscriptions: " + subs.size() + "to node " 
+                + node.getId());
+        for(Subscription sub : subs){
+            logger.debug("Subscription jid " + sub.getJid() 
+                    + " id " + sub.getId());
+            if (sub.getJid().equals(jid+"@"+xmppserver)) {
+                logger.debug("found subscription for jid " + sub.getJid());
+                jidsubs.add(sub);
+            }
+        }
+        return (List<? extends Subscription>)jidsubs;
+    }
 
+    public void subscribeIfNotSubscribed(LeafNode node, String jid, 
+            String xmppserver) throws XMPPException {
+        logger.debug("subscribeIfNotSubscribed");
+        if (!isSubscribed(node, jid, xmppserver)) {
+            node.subscribe(jid+"@"+xmppserver);
+            logger.info("jid " + jid+"@"+xmppserver + " subscribed to node ");
+       
+        }
+        // temporal delete extra subscriptions
+        else {
+            List<? extends Subscription> jidsubs = subscriptionsByJID(node, jid, 
+                    xmppserver);
+            for(Subscription sub : jidsubs){
+                if(jidsubs.size()>1) {
+                    node.unsubscribe(sub.getJid(), sub.getId());
+                    jidsubs.remove(sub);
+                    logger.debug("deleted subscription jid " + sub.getJid() 
+                            + " id " + sub.getId()+ " to node " + node.getId());
+                }
+            }
+        }
+        
+    }
+    
+    // should not delete subscriptions created by other subscriber-user
+//    public void deleteSubscriptions(LeafNode node) throws XMPPException {
+//        List<? extends Subscription> subs = node.getSubscriptions();
+//        for(Subscription sub : subs){
+//            node.unsubscribe(sub.getJid(), sub.getId());
+//            logger.info("deleted jid " + sub.getJid() + 
+//                    " subscription to node " + node + " with id " + 
+//                    sub.getId());
+//        }
+//    }
+    
+    public void deleteSubscriptions(LeafNode node, String jid, 
+            String xmppserver) throws XMPPException {
+
+        List<? extends Subscription> jidsubs = subscriptionsByJID(node, jid, 
+                xmppserver);
+        for(Subscription sub : jidsubs){
+            node.unsubscribe(sub.getJid(), sub.getId());
+            logger.debug("deleted subscription jid " + sub.getJid() 
+                    + " id " + sub.getId() + " to node " + node.getId());
+        }
+    }
+    
 	/**
 	 * @param args
 	 * @throws InterruptedException 
@@ -120,8 +208,10 @@ public class Subscriber {
 		    LeafNode node = p.getNode(nodeName);
 		    LeafNode node3 = p3.getNode(nodeName);
 			
-		    node.subscribe(username + "@vmuss12.deri.ie");
-		    node3.subscribe("testuser4@vmuss12.deri.ie");
+//		    node.subscribe(username + "@vmuss12.deri.ie");
+            p.subscribeIfNotSubscribed(node, username, xmppserver);
+//		    node3.subscribe("testuser4@vmuss12.deri.ie");
+            p3.subscribeIfNotSubscribed(node3, "testuser4", xmppserver);
 		    
 		    // add item event listener
 			node.addItemEventListener(new ItemEventCoordinator());
