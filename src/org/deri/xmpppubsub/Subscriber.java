@@ -10,14 +10,11 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.Affiliation;
 import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.LeafNode;
-import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.Subscription;
 
 /**
@@ -25,91 +22,31 @@ import org.jivesoftware.smackx.pubsub.Subscription;
  * @author Julia Anaya
  *
  */
-public class Subscriber {
+public class Subscriber extends PubSubClient {
 
-    XMPPConnection connection;
-    PubSubManager mgr;
-    public String userName;
-    public String password;
-    public String domain;
-    public int port;
     public ArrayList<LeafNode> nodesSubscribedTo;
-    static Logger logger = Logger.getLogger(Subscriber.class);
 
-
-    /**
-     * @param userName
-     * @param password
-     * @param xmppserver
-     * @param port
-     * @return void 
-     *
-     */
-
-    public Subscriber(String userName, String password, String xmppserver) throws XMPPException {
-        this(userName, password, xmppserver, 5222);
+    public Subscriber(String userName, String password, String xmppserver) 
+            throws XMPPException {
+        super(userName, password, xmppserver);
+        initNodesSubscribedTo();
     }
     
-    public Subscriber(String userName, String password, String xmppserver, int port) throws XMPPException {
-        this.userName = userName;
-        this.password = password;
-        this.domain = xmppserver;
-        this.port = port;
-        this.initPubSub();   
-        this.initNodesSubscribedTo();
+    public Subscriber(String userName, String password, String xmppserver, 
+            int port, boolean createAccountIfNotExist) throws XMPPException {
+        super(userName, password, xmppserver, port, createAccountIfNotExist); 
+        initNodesSubscribedTo();          
     }
 
-    
-    /**
-     * @param userName
-     * @param password
-     * @param xmppserver
-     * @param port
-     * @return void 
-     *
-     */
-    public void initPubSub() throws XMPPException {
-	    ConnectionConfiguration config = 
-	        new ConnectionConfiguration(domain,port);
-	    connection = new XMPPConnection(config);
-	    connection.connect();
-	    connection.login(userName, password);
-        logger.info("User " + userName + " logged in to the server " 
-                + domain);
-
-		//Create a pubsub manager using an existing Connection
-		mgr = new PubSubManager(connection);
-		logger.info("PubSub manager created");
-    }
-
-    /**
-     * @return void 
-     *
-     */
-    public void disconnect() {
-    	connection.disconnect();
-		logger.info("disconected");
-    }
-
-    /**
-     * get full ID of the user that is logged in
-     * @return user or null (when not logged in)
-     */
-    public String getUser(){
-        return connection.getUser();    
+    public Subscriber(String fileName) throws IOException, XMPPException {
+        super(fileName);
+        initNodesSubscribedTo();
     }
     
-
-    public LeafNode getNode(String nodename) throws XMPPException {
-        LeafNode node = (LeafNode) mgr.getNode(nodename);
-        logger.info("node" + nodename  + "got");
-        return node;
-    }
-
-    
-    public String getJid() {
-        String jid = userName + "@" + domain;
-        return jid;
+    public Subscriber(String fileName, boolean createAccountIfNotExist) 
+            throws IOException, XMPPException {
+        super(fileName, createAccountIfNotExist);
+        initNodesSubscribedTo();
     }
 
 //  public ArrayList<LeafNode> getNodesSubscribedTo() throws XMPPException {
@@ -122,8 +59,10 @@ public class Subscriber {
 //      return nodesSubscribedTo;
 //  }
     
+    
     public void initNodesSubscribedTo() throws XMPPException {
         nodesSubscribedTo = new ArrayList<LeafNode>();
+        try {
         List<Affiliation> affs = mgr.getAffiliations();
         for(Affiliation aff : affs ) {
             String nodeName = aff.getNodeId();
@@ -131,6 +70,9 @@ public class Subscriber {
             logger.debug("jid " + this.getJid() + "is affiliated to node "
                     + nodeName);
             nodesSubscribedTo.add(node);
+        }
+        } catch (XMPPException e) {
+            logger.info("no affiliations");
         }
     }
 
@@ -143,12 +85,14 @@ public class Subscriber {
     
     public void subscribeIfNotSubscribedTo(LeafNode node) throws XMPPException {
         if (!isSubscribedTo(node)) {
+            logger.info("trying to subscribe " + this.getJid());
             node.subscribe(this.getJid());
             nodesSubscribedTo.add(node);
             logger.info("jid " + this.getJid() + " subscribed to node " 
                     + node.getId());
         }
     }
+    
     
 //    Deprecated
     public boolean isSubscribed(LeafNode node) 
@@ -160,7 +104,7 @@ public class Subscriber {
                     + node.getId());
             return true;
         } else {
-            logger.debug("jid " + domain + "is not subscribed to node " 
+            logger.info("jid " + domain + "is not subscribed to node " 
                     + node.getId());
             return false;
         }
@@ -168,16 +112,16 @@ public class Subscriber {
 
 //  Deprecated
     public List<? extends Subscription> subscriptionsByJID(LeafNode node) throws XMPPException {
-        logger.debug("subscriptionsByJID");
+        logger.info("subscriptionsByJID");
         ArrayList<Subscription> jidsubs = new ArrayList<Subscription>();
         List<? extends Subscription> subs = node.getSubscriptions();
-        logger.debug("number of subscriptions: " + subs.size() + "to node " 
+        logger.info("number of subscriptions: " + subs.size() + "to node " 
                 + node.getId());
         for(Subscription sub : subs){
-            logger.debug("Subscription jid " + sub.getJid() 
+            logger.info("Subscription jid " + sub.getJid() 
                     + " id " + sub.getId());
             if (sub.getJid().equals(this.getJid())) {
-                logger.debug("found subscription for jid " + sub.getJid());
+                logger.info("found subscription for jid " + sub.getJid());
                 jidsubs.add(sub);
             }
         }
@@ -186,7 +130,7 @@ public class Subscriber {
 
 //  Deprecated
     public void subscribeIfNotSubscribed(LeafNode node) throws XMPPException {
-        logger.debug("subscribeIfNotSubscribed");
+        logger.info("subscribeIfNotSubscribed");
         if (!isSubscribed(node)) {
             node.subscribe(this.getJid());
             logger.info("jid " + this.getJid() + " subscribed to node ");
@@ -200,13 +144,14 @@ public class Subscriber {
 //                if(jidsubs.size()>1) {
 //                    node.unsubscribe(sub.getJid(), sub.getId());
 //                    jidsubs.remove(sub);
-//                    logger.debug("deleted subscription jid " + sub.getJid() 
+//                    logger.info("deleted subscription jid " + sub.getJid() 
 //                            + " id " + sub.getId()+ " to node " + node.getId());
 //                }
 //            }
 //        }
         
     }
+    
     
     // should not delete subscriptions created by other subscriber-user
     // though node.getSubscriptions seems to return only the subscriptions 
@@ -226,7 +171,7 @@ public class Subscriber {
         List<? extends Subscription> jidsubs = this.subscriptionsByJID(node);
         for(Subscription sub : jidsubs){
             node.unsubscribe(sub.getJid(), sub.getId());
-            logger.debug("deleted subscription jid " + sub.getJid() 
+            logger.info("deleted subscription jid " + sub.getJid() 
                     + " id " + sub.getId() + " to node " + node.getId());
         }
     }
@@ -244,40 +189,31 @@ public class Subscriber {
 		    // turn on the enhanced debugger
 		    XMPPConnection.DEBUG_ENABLED = true;
 
-            Properties prop = new Properties();
-            File file = new File("subscriber.properties");
-            String filePath = file.getCanonicalPath();
-            InputStream is = new FileInputStream(filePath);
-            prop.load(is);
-            String username = prop.getProperty("username");  
-            String password = prop.getProperty("password");
-            String xmppserver = prop.getProperty("xmppserver");
-            int port = Integer.parseInt(prop.getProperty("port")); 
-            logger.debug(xmppserver);
-            logger.debug(port);
         
             String usage = "Subscriber node <outputfile>";
             String exampleusage = "testNodeWithPayloadU2";
 
-        //    String nodeName = args[0];
-          String  nodeName = "twoSubscribers";
+//        //    String nodeName = args[0];
+//          String  nodeName = "twoSubscribers";
 //            String outputfile = args[1];
-            
-		    Subscriber p = new Subscriber(username, password, xmppserver, port);
-		    Subscriber p3 = new Subscriber("testuser4", "testuser4pass", xmppserver, port);
+            String  nodeName = "node1";
+//            
+//		    Subscriber p = new Subscriber("subscriber.properties");
+            Subscriber p = new Subscriber("sub1", "sub1pass", "vmuss12.deri.ie");
+//		    Subscriber p3 = new Subscriber("testuser4", "testuser4pass", "vmuss12.deri.ie");
 		    
 		    
 			// Get the node
 		    LeafNode node = p.getNode(nodeName);
-		    LeafNode node3 = p3.getNode(nodeName);
+//		    LeafNode node3 = p3.getNode(nodeName);
 			
 
 		    node.addItemEventListener(new ItemEventCoordinator());
 		    
 //		    node.subscribe(username + "@vmuss12.deri.ie");
-            p.subscribeIfNotSubscribedTo(node);
+            p.subscribeIfNotSubscribed(node);
 //		    node3.subscribe("testuser4@vmuss12.deri.ie");
-            p3.subscribeIfNotSubscribedTo(node3);
+//            p3.subscribeIfNotSubscribedTo(node3);
 		    
 			
 		
@@ -313,14 +249,7 @@ public class Subscriber {
 		} catch (XMPPException e) {
 			e.printStackTrace();
         
-        } catch(IOException e) {
-            e.printStackTrace();
-            logger.debug(e);
         }
-//        } catch (ExtractionException e) {
-//            e.printStackTrace();
-//            logger.debug(e);
-//        }
 		
 //		xmppManager.setStatus(true, "Hello everyone");
 //		xmppManager.destroy();

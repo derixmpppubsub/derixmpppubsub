@@ -1,14 +1,8 @@
 package org.deri.xmpppubsub;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.deri.any23.extractor.ExtractionException;
-import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.AccessModel;
@@ -16,7 +10,6 @@ import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.FormType;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
-import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 
@@ -25,88 +18,27 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
  * @author Julia Anaya
  *
  */
-public class Publisher {
-    
-	private XMPPConnection connection;
-    public PubSubManager mgr;
-    public String userName;
-    public String password;
-    public String domain;
-    public int port;
-    public LeafNode node;
-    
-    static Logger logger = Logger.getLogger(Publisher.class);
-    
-    /**
-     * @param userName
-     * @param password
-     * @param xmppserver
-     * @param port
-     * @return void 
-     *
-     */
+public class Publisher extends PubSubClient {
 
-    public Publisher(String userName, String password, String xmppserver) throws XMPPException {
-        this(userName, password, xmppserver, 5222);
+    public Publisher(String userName, String password, String xmppserver) 
+            throws XMPPException {
+        super(userName, password, xmppserver);
     }
     
-    public Publisher(String userName, String password, String xmppserver, int port) throws XMPPException {
-    	this.userName = userName;
-        this.password = password;
-        this.domain = xmppserver;
-        this.port = port;
-        initPubSub(); 	
+    public Publisher(String userName, String password, String xmppserver, 
+            int port, boolean createAccountIfNotExist) throws XMPPException {
+        super(userName, password, xmppserver, port, createAccountIfNotExist);           
     }
 
-    /**
-     * Constructor with the use of the default port (for simplicity)
-     * 
-     * @param userName
-     * @param password
-     * @param xmppServer
-     * @throws XMPPException
-     */
-//    public Publisher(String userName, String password, String xmppServer) throws XMPPException {
-//        Publisher(userName, password, xmppServer, defaultXmppPort);
-//    }
+    public Publisher(String fileName) throws IOException, XMPPException {
+        super(fileName);
+    }
     
-    /**
-     * @param userName
-     * @param password
-     * @param xmppserver
-     * @param port
-     * @return void 
-     *
-     */
-    public void initPubSub() throws XMPPException {
-    	ConnectionConfiguration config = new ConnectionConfiguration(domain,port);
-	    connection = new XMPPConnection(config);
-	    connection.connect();
-	    connection.login(userName, password);
-	    logger.info("User " + userName + " logged in to the server " 
-	            + domain);
-		//Create a pubsub manager using an existing Connection
-		mgr = new PubSubManager(connection);
-		logger.info("PubSub manager created");
+    public Publisher(String fileName, boolean createAccountIfNotExist) 
+            throws IOException, XMPPException {
+        super(fileName, createAccountIfNotExist);
     }
-
-    /**
-     * @return void 
-     *
-     */
-    public void disconnect() {
-    	connection.disconnect();
-		logger.info("disconected");
-    }
-
-    /**
-     * get full ID of the user that is logged in
-     * @return user or null (when not logged in)
-     */
-    public String getUser(){
-       	return connection.getUser();	
-    }
-
+    
     /**
      * The method created a node with a given name
      * @param nodename - name of the node to be created
@@ -123,12 +55,6 @@ public class Publisher {
 		node = (LeafNode) mgr.createNode(nodename, form);
 		logger.info("node " + nodename  + " created");
     	return node;
-    }
-
-    public LeafNode getNode(String nodename) throws XMPPException {
-		node = (LeafNode) mgr.getNode(nodename);
-		logger.info("node" + nodename  + "got");
-		return node;
     }
 
     /**
@@ -178,25 +104,7 @@ public class Publisher {
             // turn on the enhanced debugger
             XMPPConnection.DEBUG_ENABLED = true;
         
-            // Using a properties file
-            
-//	    	Configuration config = new PropertiesConfiguration("./xmpppubsub.properties");
-//		    // declare variables
-//			String username = config.getString("username");
-//			String password = config.getString("password");
-//			String xmppserver = config.getString("xmppserver");
-//			int port = config.getInt("port");
-	        
-	        Properties prop = new Properties();
-	        File file = new File("xmpppubsub.properties");
-	        String filePath = file.getCanonicalPath();
-	        logger.debug(filePath);
-	        InputStream is = new FileInputStream(filePath);
-	        prop.load(is);
-	        String username = prop.getProperty("username");  
-            String password = prop.getProperty("password");
-            String xmppserver = prop.getProperty("xmppserver");
-            int port = Integer.parseInt(prop.getProperty("port")); 
+            String confFileName = "xmpppubsub.properties"; 
 		
 			String usage = "Publisher method triples";
 			//String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
@@ -212,7 +120,7 @@ public class Publisher {
             logger.debug(nodeName);
             logger.debug(args.length);
 		 
-		    Publisher p = new Publisher(username, password, xmppserver, port);
+		    Publisher p = new Publisher(confFileName);
 	//	    p.mgr.deleteNode("twoSubscribers");		    
 			// Get the node
 		    p.getOrCreateNode(nodeName);
