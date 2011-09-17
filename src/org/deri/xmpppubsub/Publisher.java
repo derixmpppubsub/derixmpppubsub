@@ -21,21 +21,21 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 public class Publisher extends PubSubClient {
 
     public Publisher(String userName, String password, String xmppserver) 
-            throws XMPPException {
+            throws XMPPException, InterruptedException {
         super(userName, password, xmppserver);
     }
     
     public Publisher(String userName, String password, String xmppserver, 
-            int port, boolean createAccountIfNotExist) throws XMPPException {
+            int port, boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
         super(userName, password, xmppserver, port, createAccountIfNotExist);           
     }
 
-    public Publisher(String fileName) throws IOException, XMPPException {
+    public Publisher(String fileName) throws IOException, XMPPException, InterruptedException {
         super(fileName);
     }
     
     public Publisher(String fileName, boolean createAccountIfNotExist) 
-            throws IOException, XMPPException {
+            throws IOException, XMPPException, InterruptedException {
         super(fileName, createAccountIfNotExist);
     }
     
@@ -155,7 +155,10 @@ public class Publisher extends PubSubClient {
         } catch (QueryTypeException e) {
 			e.printStackTrace();
 			logger.debug(e.getMessage());
-		}
+		} catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 		
 	}
 }

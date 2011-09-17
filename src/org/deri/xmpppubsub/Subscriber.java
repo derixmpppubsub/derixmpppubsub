@@ -27,24 +27,24 @@ public class Subscriber extends PubSubClient {
     public ArrayList<LeafNode> nodesSubscribedTo;
 
     public Subscriber(String userName, String password, String xmppserver) 
-            throws XMPPException {
+            throws XMPPException, InterruptedException {
         super(userName, password, xmppserver);
         initNodesSubscribedTo();
     }
     
     public Subscriber(String userName, String password, String xmppserver, 
-            int port, boolean createAccountIfNotExist) throws XMPPException {
+            int port, boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
         super(userName, password, xmppserver, port, createAccountIfNotExist); 
         initNodesSubscribedTo();          
     }
 
-    public Subscriber(String fileName) throws IOException, XMPPException {
+    public Subscriber(String fileName) throws IOException, XMPPException, InterruptedException {
         super(fileName);
         initNodesSubscribedTo();
     }
     
     public Subscriber(String fileName, boolean createAccountIfNotExist) 
-            throws IOException, XMPPException {
+            throws IOException, XMPPException, InterruptedException {
         super(fileName, createAccountIfNotExist);
         initNodesSubscribedTo();
     }
@@ -67,7 +67,7 @@ public class Subscriber extends PubSubClient {
         for(Affiliation aff : affs ) {
             String nodeName = aff.getNodeId();
             LeafNode node = this.getNode(nodeName);
-            logger.debug("jid " + this.getJid() + "is affiliated to node "
+            logger.info("jid " + this.getJid() + "is affiliated to node "
                     + nodeName);
             nodesSubscribedTo.add(node);
         }
@@ -79,7 +79,7 @@ public class Subscriber extends PubSubClient {
     public boolean isSubscribedTo(LeafNode node) {
         boolean subscribed;
         subscribed = nodesSubscribedTo.contains(node);
-        logger.debug(this.getJid() + " is subscribed to " + node.getId());
+        logger.info(this.getJid() + " is subscribed to " + node.getId());
         return subscribed;
     }
     
@@ -249,7 +249,10 @@ public class Subscriber extends PubSubClient {
 		} catch (XMPPException e) {
 			e.printStackTrace();
         
-        }
+    } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
 		
 //		xmppManager.setStatus(true, "Hello everyone");
 //		xmppManager.destroy();

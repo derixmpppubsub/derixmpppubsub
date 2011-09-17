@@ -25,17 +25,17 @@ public class PubSubClient {
     protected static Logger logger = Logger.getLogger(PubSubClient.class);
 
     public PubSubClient(String userName, String password, String xmppserver)
-            throws XMPPException {
+            throws XMPPException, InterruptedException {
         this(userName, password, xmppserver, 5222, true);
     }
     
     public PubSubClient(String userName, String password, String xmppserver, 
-            boolean createAccountIfNotExist) throws XMPPException {
+            boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
         this(userName, password, xmppserver, 5222, createAccountIfNotExist);
     }
     
     public PubSubClient(String userName, String password, String xmppserver, 
-            int port, boolean createAccountIfNotExist) throws XMPPException {
+            int port, boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
         this.userName = userName;
         this.password = password;
         this.domain = xmppserver;
@@ -43,12 +43,12 @@ public class PubSubClient {
         initPubSub(createAccountIfNotExist);   
     }
 
-    public PubSubClient(String fileName) throws IOException, XMPPException {
+    public PubSubClient(String fileName) throws IOException, XMPPException, InterruptedException {
         this(fileName, true);
     }
     
     public PubSubClient(String fileName, boolean createAccountIfNotExist) 
-            throws IOException, XMPPException {
+            throws IOException, XMPPException, InterruptedException {
         confFromFile(fileName);
         initPubSub(createAccountIfNotExist);
     }
@@ -74,7 +74,7 @@ public class PubSubClient {
             port = Integer.parseInt(prop.getProperty("port")); 
         }
 
-    public void initPubSub(boolean createAccountIfNotExist) throws XMPPException {
+    public void initPubSub(boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
     	ConnectionConfiguration config = new ConnectionConfiguration(domain,port);
         connection = new XMPPConnection(config);
         connection.connect();
@@ -88,6 +88,8 @@ public class PubSubClient {
                 connection.getAccountManager().createAccount(userName, password);
                 logger.info("authenticated? " + connection.isAuthenticated());
                 logger.info("Created account for " + userName );
+                // login fail (not-authorized) just after the account creation
+//                Thread.sleep(50);
                 connection.login(userName, password);
                 logger.info("User " + userName + " logged in to the server " 
                         + domain);
