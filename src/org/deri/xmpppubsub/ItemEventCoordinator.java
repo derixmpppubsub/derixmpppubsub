@@ -20,46 +20,68 @@ import org.xml.sax.SAXParseException;
  */
 public class ItemEventCoordinator implements ItemEventListener {
     static Logger logger = Logger.getLogger(ItemEventCoordinator.class);
-	
+	String subUser;
+    
+    public ItemEventCoordinator(String subUser) {
+        this.subUser = subUser;
+    }
+    
     @Override
 	public void handlePublishedItems(ItemPublishEvent items){
-		System.out.println("Item count: " + items.getItems().size());
+        
+        //  display offline message’s timestamp
+//        DelayInformation inf = null;
+//        try {
+//            inf = (DelayInformation)packet.getExtension("x","jabber:x:delay");
+//        } catch (Exception e) {
+//            log.error(e);
+//        }
+//        // get offline message timestamp
+//        if(inf!=null){
+//            Date date = inf.getStamp();
+
+//        float end = System.currentTimeMillis();
+
+        long end = System.nanoTime();
+        System.out.println("en listener");
+        System.out.println(end);
+        
+//		System.out.println("Item count: " + items.getItems().size());
 //        System.out.println(items);		
-		List<ItemPublishEvent> its = items.getItems();
+		
+        List<ItemPublishEvent> its = items.getItems();
 		Iterator itr = its.iterator();
 		while (itr.hasNext()){
 			Item item = (Item) itr.next();
 			String itemId = item.getId();
 //            System.out.println("item id: " + itemId);
-			
-			String beginmillis = "" ;
+
+	        String start = "";
 			Matcher m = Pattern.compile("[0-9]{13}").matcher(itemId) ;
 		    if( m.find() ) {
-		        beginmillis = m.group(0) ;
+		        start = m.group(0) ;
 		    } 
-//		    System.out.println(beginmillis);
+//		    System.out.println(start);
 			
-//			String beginmillis = item.getId.substring(text.length() - 13);
-//			beginmillis = itemId.replace(target, "");
-			float endmillis = System.currentTimeMillis();
-//            System.out.println(endmillis);
+//			String start = item.getId.substring(text.length() - 13);
+//			start = itemId.replace(target, "");
 			
-			Float delay = endmillis - Float.parseFloat(beginmillis);
+			Long itemTime = end - Long.parseLong(start);
 //			logger.info(delay);
-			System.out.println("Millis delay: " + delay);
+			System.out.println("Nanosecs: " + itemTime);
 			
 
 		    FileWriter writer;
             try {
                 writer = new FileWriter("results.csv", true);
-                writer.append(itemId);
+                writer.append(subUser);
                 writer.append(',');
-                writer.append(delay.toString());
+                writer.append(itemTime.toString());
                 writer.append('\n');
                 writer.flush();
                 writer.close();
             } catch (IOException e1) {
-                // TODO Auto-generated catch block
+                System.out.println("error trying to write the file");
                 e1.printStackTrace();
             }
 

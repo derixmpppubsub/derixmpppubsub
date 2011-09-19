@@ -208,7 +208,7 @@ public class Subscriber extends PubSubClient {
 //		    LeafNode node3 = p3.getNode(nodeName);
 			
 
-		    node.addItemEventListener(new ItemEventCoordinator());
+		    node.addItemEventListener(new ItemEventCoordinator("sub1"));
 		    
 //		    node.subscribe(username + "@vmuss12.deri.ie");
             p.subscribeIfNotSubscribed(node);
