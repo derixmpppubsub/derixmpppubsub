@@ -21,9 +21,11 @@ import org.xml.sax.SAXParseException;
 public class ItemEventCoordinator implements ItemEventListener {
     static Logger logger = Logger.getLogger(ItemEventCoordinator.class);
 	String subUser;
+	String fileName;
     
-    public ItemEventCoordinator(String subUser) {
+    public ItemEventCoordinator(String subUser, String fileName) {
         this.subUser = subUser;
+        this.fileName = fileName;
     }
     
     @Override
@@ -40,60 +42,64 @@ public class ItemEventCoordinator implements ItemEventListener {
 //        if(inf!=null){
 //            Date date = inf.getStamp();
 
-//        float end = System.currentTimeMillis();
-
-        long end = System.nanoTime();
+        long end = System.currentTimeMillis();
+//        long end = System.nanoTime();
         System.out.println("en listener");
-        System.out.println(end);
         
 //		System.out.println("Item count: " + items.getItems().size());
 //        System.out.println(items);		
-		
-        List<ItemPublishEvent> its = items.getItems();
-		Iterator itr = its.iterator();
-		while (itr.hasNext()){
-			Item item = (Item) itr.next();
-			String itemId = item.getId();
-//            System.out.println("item id: " + itemId);
-
-	        String start = "";
-			Matcher m = Pattern.compile("[0-9]{13}").matcher(itemId) ;
-		    if( m.find() ) {
-		        start = m.group(0) ;
-		    } 
-//		    System.out.println(start);
-			
-//			String start = item.getId.substring(text.length() - 13);
-//			start = itemId.replace(target, "");
-			
-			Long itemTime = end - Long.parseLong(start);
-//			logger.info(delay);
-			System.out.println("Nanosecs: " + itemTime);
-			
-
-		    FileWriter writer;
-            try {
-                writer = new FileWriter("results.csv", true);
-                writer.append(subUser);
-                writer.append(',');
-                writer.append(itemTime.toString());
-                writer.append('\n');
-                writer.flush();
-                writer.close();
-            } catch (IOException e1) {
-                System.out.println("error trying to write the file");
-                e1.printStackTrace();
-            }
-
-			
-			//TODO: put data into the RDF store
-//			try {
-//			    System.out.println("item content: " + item.toXML());
-//			} catch (Exception e) {
-//			    logger.info("error printing item content");
-//	            e.printStackTrace();
-//			}
-		}
+//		try {
+            List<ItemPublishEvent> its = items.getItems();
+    		Iterator itr = its.iterator();
+    		while (itr.hasNext()){
+    			Item item = (Item) itr.next();
+    			String itemId = item.getId();
+    //            System.out.println("item id: " + itemId);
+    
+    	        String start = "";
+    			Matcher m = Pattern.compile("[0-9]{13}").matcher(itemId) ;
+    		    if( m.find() ) {
+    		        start = m.group(0) ;
+    		    } 
+    //		    System.out.println(start);
+    			
+    //			String start = item.getId.substring(text.length() - 13);
+    //			start = itemId.replace(target, "");
+    			
+    //			Long itemTime = end - Long.parseLong(start);
+    		    Long itemTime = end - Long.valueOf(start);
+    //			logger.info(delay);
+    			System.out.println("start time: " +start);
+    	        System.out.println("end time: " +end);
+    			System.out.println("elapsed time: " + itemTime);
+    			
+    
+    		    FileWriter writer;
+                try {
+                    writer = new FileWriter(fileName, true);
+                    writer.append(subUser);
+                    writer.append(',');
+                    writer.append(itemTime.toString());
+                    writer.append('\n');
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e1) {
+                    System.out.println("error trying to write the file");
+                    e1.printStackTrace();
+                }
+    
+    			
+    			//TODO: put data into the RDF store
+    //			try {
+    //			    System.out.println("item content: " + item.toXML());
+    //			} catch (Exception e) {
+    //			    logger.info("error printing item content");
+    //	            e.printStackTrace();
+    //			}
+    		}
+//	    } catch(SAXParseException e) {
+//	        
+//	    }
 		
 	}
 }

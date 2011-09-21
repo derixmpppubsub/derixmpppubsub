@@ -192,7 +192,8 @@ public class SPARQLQuery {
 		String queryxml;
 		logger.debug("converting the query to XML compliant format");
 		logger.debug(query);
-		queryxml = beginNS + "<![CDATA[" + query + "]]>" + endNS;
+//		queryxml = beginNS + "<![CDATA[" + "<![CDATA[" + query + "]]>"+ "]]>" + endNS;
+        queryxml = beginNS +  "<![CDATA[" + query + "]]>" + endNS;
 		return queryxml;
 	}
 

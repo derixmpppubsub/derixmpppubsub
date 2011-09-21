@@ -127,7 +127,7 @@ public class PubSubClient {
 
     public LeafNode getNode(String nodename) throws XMPPException {
         node = (LeafNode) mgr.getNode(nodename);
-        logger.info("node" + nodename  + "got");
+        logger.info("got node " + nodename);
         return node;
     }
 

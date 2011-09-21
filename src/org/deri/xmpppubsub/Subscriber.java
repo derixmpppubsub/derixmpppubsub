@@ -24,8 +24,9 @@ import org.jivesoftware.smackx.pubsub.Subscription;
  */
 public class Subscriber extends PubSubClient {
 
-    public ArrayList<LeafNode> nodesSubscribedTo;
-
+//    public ArrayList<LeafNode> nodesSubscribedTo;
+    public ArrayList<String> nodesSubscribedTo;
+    
     public Subscriber(String userName, String password, String xmppserver) 
             throws XMPPException, InterruptedException {
         super(userName, password, xmppserver);
@@ -61,16 +62,19 @@ public class Subscriber extends PubSubClient {
     
     
     public void initNodesSubscribedTo() throws XMPPException {
-        nodesSubscribedTo = new ArrayList<LeafNode>();
+//        nodesSubscribedTo = new ArrayList<LeafNode>();
+
+        nodesSubscribedTo = new ArrayList<String>();
         try {
-        List<Affiliation> affs = mgr.getAffiliations();
-        for(Affiliation aff : affs ) {
-            String nodeName = aff.getNodeId();
-            LeafNode node = this.getNode(nodeName);
-            logger.info("jid " + this.getJid() + "is affiliated to node "
-                    + nodeName);
-            nodesSubscribedTo.add(node);
-        }
+            List<Affiliation> affs = mgr.getAffiliations();
+            for(Affiliation aff : affs ) {
+                String nodeName = aff.getNodeId();
+//                LeafNode node = this.getNode(nodeName);
+                logger.debug("jid " + this.getJid() + "is affiliated to node "
+                        + nodeName);
+//                nodesSubscribedTo.add(node);
+                nodesSubscribedTo.add(nodeName);
+            }
         } catch (XMPPException e) {
             logger.info("no affiliations");
         }
@@ -78,16 +82,18 @@ public class Subscriber extends PubSubClient {
 
     public boolean isSubscribedTo(LeafNode node) {
         boolean subscribed;
-        subscribed = nodesSubscribedTo.contains(node);
+//        subscribed = nodesSubscribedTo.contains(node);
+        subscribed = nodesSubscribedTo.contains(node.getId());
         logger.info(this.getJid() + " is subscribed to " + node.getId());
         return subscribed;
     }
     
     public void subscribeIfNotSubscribedTo(LeafNode node) throws XMPPException {
         if (!isSubscribedTo(node)) {
-            logger.info("trying to subscribe " + this.getJid());
+            logger.debug("trying to subscribe " + this.getJid());
             node.subscribe(this.getJid());
-            nodesSubscribedTo.add(node);
+//            nodesSubscribedTo.add(node);
+            nodesSubscribedTo.add(node.getId());
             logger.info("jid " + this.getJid() + " subscribed to node " 
                     + node.getId());
         }
@@ -208,7 +214,7 @@ public class Subscriber extends PubSubClient {
 //		    LeafNode node3 = p3.getNode(nodeName);
 			
 
-		    node.addItemEventListener(new ItemEventCoordinator("sub1"));
+		    node.addItemEventListener(new ItemEventCoordinator("sub1", "results.csv"));
 		    
 //		    node.subscribe(username + "@vmuss12.deri.ie");
             p.subscribeIfNotSubscribed(node);

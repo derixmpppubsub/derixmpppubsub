@@ -76,8 +76,8 @@ public class Publisher extends PubSubClient {
      *
      */
     public void publishQuery(String query) throws XMPPException {
-//    	String itemID = connection.getUser() + System.currentTimeMillis();
-        String itemID = connection.getUser() + System.nanoTime();
+    	String itemID = connection.getUser() + System.currentTimeMillis();
+//        String itemID = connection.getUser() + System.nanoTime();
 	    SimplePayload payloadNS = new SimplePayload("query", "http://www.w3.org/TR/sparql11-update/", query);
 	    PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(itemID, payloadNS);
 	    node.send(item);
