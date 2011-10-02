@@ -5,8 +5,12 @@ package org.deri.xmpppubsub;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -43,7 +47,67 @@ public class SPARQLWrapper {
 
     public SPARQLWrapper() {
     }
-    
+    public static String excutePost(String targetURL, String urlParameters)
+    {
+      URL url;
+      HttpURLConnection connection = null;  
+      try {
+        //Create connection
+        url = new URL(targetURL);
+        connection = (HttpURLConnection)url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", 
+             "application/x-www-form-urlencoded");
+              
+        connection.setRequestProperty("Content-Length", "" + 
+                 Integer.toString(urlParameters.getBytes().length));
+        connection.setRequestProperty("Content-Language", "en-US");  
+              
+        connection.setUseCaches (false);
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
+
+        //Send request
+        DataOutputStream wr = new DataOutputStream (
+                    connection.getOutputStream ());
+        wr.writeBytes (urlParameters);
+        wr.flush ();
+        wr.close ();
+
+        //Get Response    
+        InputStream is = connection.getInputStream();
+        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+        String line;
+        StringBuffer response = new StringBuffer(); 
+        while((line = rd.readLine()) != null) {
+          response.append(line);
+          response.append('\r');
+        }
+        rd.close();
+        return response.toString();
+      } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+      } finally {
+        if(connection != null) {
+          connection.disconnect(); 
+        }
+      }
+        
+//        StringBuffer sbContent = new StringBuffer();
+//        sbContent.append("X=");
+//        sbContent.append(URLEncoder.encode("ABC", "UTF-8"));
+//        DataOutputStream stream = new
+//        DataOutputStream(connection.getOutputStream ());
+//        stream.writeBytes(sbContent.toString());
+//        stream.flush();
+//        stream.close();
+//        InputStream inputStream =
+//        connection.getInputStream();
+//        inputStream.close();
+//        } catch (Throwable t) {
+//        }
+    }
     public String createQuery(String triples) {
 //
 //        String prolog = "PREFIX rdf: <"+RDF.getURI()+"> \n" ;
@@ -54,13 +118,13 @@ public class SPARQLWrapper {
 //                "?emp a cisco:Employee ." +
 //                "}" ;         
 //        logger.debug("Execute query=\n"+queryString) ;
-        String queryString = "INSERT INTO test1 DATA {" +
+        String queryString = "INSERT DATA { GRAPH <http://localhost/test1> {" +
         		triples +
-        		" }"; 
+        		" } }"; 
         return queryString;
     }
     
-    public void executeQuery(String queryString, String endpoint) {
+    public String executeQuery(String queryString, String endpoint) throws UnsupportedEncodingException {
 
      //Model model = ModelFactory.createMemModelMaker().createModel();
 //     Query query = QueryFactory.create(queryString);
@@ -99,13 +163,18 @@ public class SPARQLWrapper {
      // Illegal:
      // But dataset is a Dataset object, not the uri.
      // I don't believe this is the correct way to overcome this:
-     Dataset dataset = DatasetFactory.create(endpoint);
+//     List<String> uriList = new ArrayList<String>();
+//     uriList.add(endpoint);
+//     Dataset dataset = DatasetFactory.create(uriList);
     //java.io.IOException: Server returned HTTP response code: 500 for URL: http://192.168.1.8:8000/sparql/
-         
+     
+     String urlParameters = "update=" + URLEncoder.encode(queryString, "UTF-8");
+     
      starttime_sys = System.nanoTime();
      starttime_cpu = tb_cpu.getCurrentThreadCpuTime();
      
-     UpdateAction.parseExecute(queryString, dataset);
+//     UpdateAction.parseExecute(queryString, dataset);
+     String result = this.excutePost(endpoint, urlParameters);
      
      endtime_cpu = tb_cpu.getCurrentThreadCpuTime();
      endtime_sys = System.nanoTime();
@@ -116,19 +185,14 @@ public class SPARQLWrapper {
 //     UpdateRequest uquery = UpdateRequest.create(queryString);
 //     UpdateProcessor proc = UpdateExecutionFactory.create(uquery, dsg) ;
      
-     
-     
-     
-     
 
-     
-     
-     
+     return result;
     }
     
     /**
      * @param args
      * void
+     * @throws UnsupportedEncodingException 
      * 
      */
     public static void main(String[] args) {
@@ -141,10 +205,16 @@ public class SPARQLWrapper {
             System.out.println(e);
         }
         String triples = "<http://ecp-alpha/semantic/post/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .";
-        String endpoint= "http://192.168.1.8:8000/sparql";
+        String endpoint= "http://192.168.1.8:8000/update/";
         SPARQLWrapper sw = new SPARQLWrapper();
         String queryString = sw.createQuery(triples);
-        sw.executeQuery(queryString, endpoint);
+        try {
+            String result = sw.executeQuery(queryString, endpoint);
+            System.out.println(result);
+        } catch (UnsupportedEncodingException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         try {
             outputWriter.write("    Select timesued_cpu = " + sw.usedtime_cpu + " sec.\n");
             outputWriter.write("    Select timesued_sys = " + sw.usedtime_sys + " sec.\n");
