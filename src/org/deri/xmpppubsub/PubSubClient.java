@@ -75,7 +75,7 @@ public class PubSubClient {
         }
 
     public void initPubSub(boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
-    	ConnectionConfiguration config = new ConnectionConfiguration(domain,port);
+        ConnectionConfiguration config = new ConnectionConfiguration(domain,port);
         connection = new XMPPConnection(config);
         connection.connect();
 
@@ -91,16 +91,16 @@ public class PubSubClient {
                 // login fail (not-authorized) just after the account creation
 //                Thread.sleep(50);
                 connection.login(userName, password);
-                logger.info("User " + userName + " logged in to the server " 
+                logger.info("User " + connection.getUser()  + " logged in to the server " 
                         + domain);
             } else {
                 System.out.println("account " + userName + "doesn't exist "
                         + "and is not going to be created");
             }
         }
-    	//Create a pubsub manager using an existing Connection
-    	mgr = new PubSubManager(connection);
-    	logger.info("PubSub manager created");
+        //Create a pubsub manager using an existing Connection
+        mgr = new PubSubManager(connection);
+        logger.info("PubSub manager created");
     }
 
     /**
@@ -108,8 +108,8 @@ public class PubSubClient {
      *
      */
     public void disconnect() {
-    	connection.disconnect();
-    	logger.info("disconected");
+        connection.disconnect();
+        logger.info("disconected");
     }
 
     /**
@@ -117,7 +117,7 @@ public class PubSubClient {
      * @return user or null (when not logged in)
      */
     public String getUser() {
-       	return connection.getUser();	
+           return connection.getUser();    
     }
     
     public String getJid() {
