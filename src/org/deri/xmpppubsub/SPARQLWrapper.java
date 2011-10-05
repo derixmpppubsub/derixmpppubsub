@@ -41,9 +41,10 @@ import org.apache.log4j.Logger;
  *
  */
 public class SPARQLWrapper {
-    long starttime_cpu, endtime_cpu, starttime_sys, endtime_sys;
-    double usedtime_cpu, usedtime_sys;
+    public long starttime_cpu, endtime_cpu, starttime_sys, endtime_sys;
+    public double usedtime_cpu, usedtime_sys;
     ThreadMXBean tb_cpu = ManagementFactory.getThreadMXBean();
+	static Logger logger = Logger.getLogger(SPARQLWrapper.class);
 
     public SPARQLWrapper() {
     }
@@ -118,13 +119,14 @@ public class SPARQLWrapper {
 //                "?emp a cisco:Employee ." +
 //                "}" ;         
 //        logger.debug("Execute query=\n"+queryString) ;
-        String queryString = "INSERT DATA { GRAPH <http://localhost/test1> {" +
+        String queryString = "INSERT DATA { " +
         		triples +
-        		" } }"; 
+        		" }"; 
         return queryString;
     }
     
-    public String executeQuery(String queryString, String endpoint) throws UnsupportedEncodingException {
+    public String executeQuery(String queryString, String endpoint, 
+            boolean update) throws UnsupportedEncodingException {
 
      //Model model = ModelFactory.createMemModelMaker().createModel();
 //     Query query = QueryFactory.create(queryString);
@@ -167,9 +169,12 @@ public class SPARQLWrapper {
 //     uriList.add(endpoint);
 //     Dataset dataset = DatasetFactory.create(uriList);
     //java.io.IOException: Server returned HTTP response code: 500 for URL: http://192.168.1.8:8000/sparql/
-     
-     String urlParameters = "update=" + URLEncoder.encode(queryString, "UTF-8");
-     
+     String urlParameters;
+     if (update) {
+        urlParameters = "update=" + URLEncoder.encode(queryString, "UTF-8");
+     } else {
+        urlParameters = "query=" + URLEncoder.encode(queryString, "UTF-8");
+     }
      starttime_sys = System.nanoTime();
      starttime_cpu = tb_cpu.getCurrentThreadCpuTime();
      
@@ -196,8 +201,9 @@ public class SPARQLWrapper {
      * 
      */
     public static void main(String[] args) {
+		BasicConfigurator.configure();
         Writer outputWriter = null;
-        File outputFile = new File("test_result_jena_database_updates");
+        File outputFile = new File("insert-times.txt");
         try {
             outputWriter = new BufferedWriter(new FileWriter(outputFile));
         } catch (Exception e) {
@@ -205,11 +211,12 @@ public class SPARQLWrapper {
             System.out.println(e);
         }
         String triples = "<http://ecp-alpha/semantic/post/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .";
-        String endpoint= "http://192.168.1.8:8000/update/";
+        String endpoint= "http://localhost:8000/update/";
         SPARQLWrapper sw = new SPARQLWrapper();
         String queryString = sw.createQuery(triples);
+        logger.info(queryString);
         try {
-            String result = sw.executeQuery(queryString, endpoint);
+            String result = sw.executeQuery(queryString, endpoint, true);
             System.out.println(result);
         } catch (UnsupportedEncodingException e1) {
             // TODO Auto-generated catch block

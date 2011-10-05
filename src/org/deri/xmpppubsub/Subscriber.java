@@ -255,10 +255,12 @@ public class Subscriber extends PubSubClient {
         } catch (XMPPException e) {
             e.printStackTrace();
         
-    } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    }
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
 //        xmppManager.setStatus(true, "Hello everyone");
 //        xmppManager.destroy();

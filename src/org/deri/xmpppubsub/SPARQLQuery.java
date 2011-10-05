@@ -9,13 +9,13 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.deri.any23.Any23;
-import org.deri.any23.ExtractionReport;
-import org.deri.any23.extractor.ExtractionException;
-import org.deri.any23.source.DocumentSource;
-import org.deri.any23.source.FileDocumentSource;
-import org.deri.any23.writer.NTriplesWriter;
-import org.deri.any23.writer.TripleHandler;
+//import org.deri.any23.Any23;
+//import org.deri.any23.ExtractionReport;
+//import org.deri.any23.extractor.ExtractionException;
+//import org.deri.any23.source.DocumentSource;
+//import org.deri.any23.source.FileDocumentSource;
+//import org.deri.any23.writer.NTriplesWriter;
+//import org.deri.any23.writer.TripleHandler;
 
 /**
  * @author Maciej Dabrowski
@@ -41,6 +41,19 @@ public class SPARQLQuery {
 
 	static Logger logger = Logger.getLogger(SPARQLQuery.class);
 
+
+	/**
+	 * Simple method that wraps the triples with default query type
+	 * 
+	 * @param triples
+	 * @throws QueryTypeException
+	 * @throws ExtractionException
+	 * @throws IOException
+	 */
+	public SPARQLQuery(String triples) throws IOException, QueryTypeException {
+		query = wrapTriples(defaultQueryType, triples);
+	}
+    
 	/**
 	 * 
 	 * @param queryType
@@ -51,7 +64,7 @@ public class SPARQLQuery {
 	 * @throws ExtractionException
 	 */
 	public SPARQLQuery(SPARQLQueryType queryType, String triplesSource)
-			throws IOException, ExtractionException, QueryTypeException {
+			throws IOException, QueryTypeException {
 
 		// convert any serialized rdf to triples
 		triples = getn3FromFile(triplesSource);
@@ -98,19 +111,6 @@ public class SPARQLQuery {
 	}
 
 	/**
-	 * Simple method that wraps the triples with default query type
-	 * 
-	 * @param triples
-	 * @throws QueryTypeException
-	 * @throws ExtractionException
-	 * @throws IOException
-	 */
-	public SPARQLQuery(String triples) throws IOException, ExtractionException,
-			QueryTypeException {
-		query = wrapTriples(defaultQueryType, triples);
-	}
-
-	/**
 	 * Method that reads triples data from a file.
 	 * 
 	 * @param fileName
@@ -147,42 +147,42 @@ public class SPARQLQuery {
 	 * @throws IOException
 	 * @throws ExtractionException
 	 */
-	public String source23(String triplesSource) throws IOException,
-			ExtractionException {
-
-		// TODO: this should be cleaned up
-		// String anyquery = "http://any23.org/best/"+url;
-		// triples = url;
-
-		// TODO: solve
-		// Exception in thread "main" java.lang.NoClassDefFoundError:
-		// org/slf4j/LoggerFactory
-		// at
-		// org.deri.any23.configuration.DefaultConfiguration.<clinit>(DefaultConfiguration.java:44)
-		// at org.deri.any23.Any23.<clinit>(Any23.java:67)
-
-		Any23 runner = new Any23();
-		// The second argument of StringDocumentSource() must be a valid URI.
-		// try {
-		// DocumentSource source = new FileDocumentSource(triplesSource);
-		// } catch (){
-		// String content = "";
-		// DocumentSource source = new StringDocumentSource(content,
-		// triplesSource);
-		// }
-		// File file = new File("org/deri/xmpppubsub/data/" + triplesSource);
-
-		File file = new File(triplesSource);
-		DocumentSource source = new FileDocumentSource(file);
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		TripleHandler handler = new NTriplesWriter(out);
-		ExtractionReport report = runner.extract(source, handler);
-
-		// TODO: is there anything useful in the extration report?
-
-		String n3 = out.toString("UTF-8");
-		return n3;
-	}
+//	public String source23(String triplesSource) throws IOException,
+//			ExtractionException {
+//
+//		// TODO: this should be cleaned up
+//		// String anyquery = "http://any23.org/best/"+url;
+//		// triples = url;
+//
+//		// TODO: solve
+//		// Exception in thread "main" java.lang.NoClassDefFoundError:
+//		// org/slf4j/LoggerFactory
+//		// at
+//		// org.deri.any23.configuration.DefaultConfiguration.<clinit>(DefaultConfiguration.java:44)
+//		// at org.deri.any23.Any23.<clinit>(Any23.java:67)
+//
+//		Any23 runner = new Any23();
+//		// The second argument of StringDocumentSource() must be a valid URI.
+//		// try {
+//		// DocumentSource source = new FileDocumentSource(triplesSource);
+//		// } catch (){
+//		// String content = "";
+//		// DocumentSource source = new StringDocumentSource(content,
+//		// triplesSource);
+//		// }
+//		// File file = new File("org/deri/xmpppubsub/data/" + triplesSource);
+//
+//		File file = new File(triplesSource);
+//		DocumentSource source = new FileDocumentSource(file);
+//		ByteArrayOutputStream out = new ByteArrayOutputStream();
+//		TripleHandler handler = new NTriplesWriter(out);
+//		ExtractionReport report = runner.extract(source, handler);
+//
+//		// TODO: is there anything useful in the extration report?
+//
+//		String n3 = out.toString("UTF-8");
+//		return n3;
+//	}
 
 	/**
 	 * 
@@ -297,9 +297,9 @@ public class SPARQLQuery {
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.debug(e.getMessage());
-		} catch (ExtractionException e) {
-			e.printStackTrace();
-			logger.debug(e.getMessage());
+//		} catch (ExtractionException e) {
+//			e.printStackTrace();
+//			logger.debug(e.getMessage());
 		} catch (QueryTypeException e) {
 			e.printStackTrace();
 			logger.debug(e.getMessage());
