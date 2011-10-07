@@ -36,19 +36,20 @@ import com.hp.hpl.jena.update.UpdateAction;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import sun.misc.IOUtils;
 /**
  * @author duy
  *
  */
 public class SPARQLWrapper {
-    public long starttime_cpu, endtime_cpu, starttime_sys, endtime_sys;
-    public double usedtime_cpu, usedtime_sys;
-    ThreadMXBean tb_cpu = ManagementFactory.getThreadMXBean();
+    public Long time;
+//    public double usedtime_cpu, usedtime_sys;
+//    ThreadMXBean tb_cpu = ManagementFactory.getThreadMXBean();
 	static Logger logger = Logger.getLogger(SPARQLWrapper.class);
 
     public SPARQLWrapper() {
     }
-    public static String excutePost(String targetURL, String urlParameters)
+    public static String excutePost(String targetURL, String urlParameters, boolean isConstruct)
     {
       URL url;
       HttpURLConnection connection = null;  
@@ -57,35 +58,96 @@ public class SPARQLWrapper {
         url = new URL(targetURL);
         connection = (HttpURLConnection)url.openConnection();
         connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", 
-             "application/x-www-form-urlencoded");
-              
-        connection.setRequestProperty("Content-Length", "" + 
-                 Integer.toString(urlParameters.getBytes().length));
-        connection.setRequestProperty("Content-Language", "en-US");  
-              
-        connection.setUseCaches (false);
-        connection.setDoInput(true);
-        connection.setDoOutput(true);
+//        if (isConstruct) {
+//            connection.setRequestProperty("Accept", "application/rdf+xml");
+//            connection.setRequestProperty("Content-type", "text/plain");
+//            OutputStream out = connection.getOutputStream();
+//            IOUtils.write("The text to enhance", out);
+//            IOUtils.closeQuietly(out);
+//            connection.connect(); //send the request
+//            if(connection.getResponseCode() > 299){ //assume an error
+//                //error response
+//                InputStream errorStream = connection.getErrorStream();
+//                if(errorStream != null){
+//                    String errorMessage = IOUtils.toString(errorStream);
+//                    IOUtils.closeQuietly(errorStream);
+//                    //write a error message
+//                } else { //no error data
+//                    //write default error message with the status code
+//                }
+//            } else { //get the enhancement results
+//                InputStream enhancementResults = connection.getInputStream();
+//            }
+//            
+//            
+//            post.setDoInput(true);
+//            post.setDoOutput(true);
+//            post.setRequestProperty("Content-Type","application/rdf+xml; charset=utf-8");
+//            //post.setRequestProperty("Content-Encoding","UTF-8");
+//            // read the response
+//            int status = post.getResponseCode();
+//            String message = post.getResponseMessage();
+//            Log.debug(logger, "SWSConnection > sendSWSRequest > response status [" + status + "] message [" + message + "]");
+//            
+//            reader = new BufferedReader(new InputStreamReader(post.getInputStream()));
+//            String line = null;
+//            while ((line = reader.readLine()) != null) {
+//                sb.append(line).append('\n');
+//            }
+//            Log.debug(logger, "SWSConnector > sendSWSRequest > response: " + sb.toString());
+//            String returnValue = "";
+//            if (status != 200) {
+//                returnValue = sb.toString();
+//            }
+//            return returnValue;
+//
+//        } else {
+//            connection.setRequestProperty("Content-Type", 
+//                 "application/x-www-form-urlencoded");
+//
+//            connection.setRequestProperty("Content-Length", "" + 
+//                     Integer.toString(urlParameters.getBytes().length));
+//            connection.setRequestProperty("Content-Language", "en-US");  
+        
+//            connection.setRequestProperty("Content-Type","application/rdf+xml; charset=utf-8");
+//            connection.setRequestProperty("Content-type", "text/plain");
+//            //connection.setRequestProperty("Content-Encoding","UTF-8");
+            
+//            connection.setRequestProperty("Accept", "application/rdf+xml; charset=utf-8");
+//            connection.setRequestProperty("Accept", "application/sparql-results+xml");
+//            connection.setRequestProperty("Accept","text/rdf+n3");
+            //if (isConstruct) {
+                connection.setRequestProperty("Accept","text/plain");
+            //}
+            connection.setUseCaches (false);
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
 
-        //Send request
-        DataOutputStream wr = new DataOutputStream (
-                    connection.getOutputStream ());
-        wr.writeBytes (urlParameters);
-        wr.flush ();
-        wr.close ();
+            //Send request
+            DataOutputStream wr = new DataOutputStream (
+                        connection.getOutputStream ());
+            wr.writeBytes (urlParameters);
+            wr.flush ();
+            wr.close ();
 
-        //Get Response    
-        InputStream is = connection.getInputStream();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-        String line;
-        StringBuffer response = new StringBuffer(); 
-        while((line = rd.readLine()) != null) {
-          response.append(line);
-          response.append('\r');
-        }
-        rd.close();
-        return response.toString();
+            //Get Response    
+            
+            int status = connection.getResponseCode();
+            String message = connection.getResponseMessage();
+            logger.debug("response status [" + status + "] message [" + message + "]");
+            
+            InputStream is = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuffer response = new StringBuffer(); 
+            while((line = rd.readLine()) != null) {
+              response.append(line);
+              response.append('\r');
+            }
+            rd.close();
+            logger.debug(response.toString());
+            return response.toString();
+//        }
       } catch (Exception e) {
         e.printStackTrace();
         return null;
@@ -169,22 +231,28 @@ public class SPARQLWrapper {
 //     uriList.add(endpoint);
 //     Dataset dataset = DatasetFactory.create(uriList);
     //java.io.IOException: Server returned HTTP response code: 500 for URL: http://192.168.1.8:8000/sparql/
+     boolean isConstruct = queryString.startsWith("query=CONSTRUCT");
      String urlParameters;
      if (update) {
         urlParameters = "update=" + URLEncoder.encode(queryString, "UTF-8");
      } else {
         urlParameters = "query=" + URLEncoder.encode(queryString, "UTF-8");
      }
-     starttime_sys = System.nanoTime();
-     starttime_cpu = tb_cpu.getCurrentThreadCpuTime();
-     
+     logger.info(urlParameters);
+//     long starttime_cpu, endtime_cpu, starttime_sys, endtime_sys, 
+     long start, end;
+//     starttime_sys = System.nanoTime();
+//     starttime_cpu = tb_cpu.getCurrentThreadCpuTime();
+     start = System.currentTimeMillis();
 //     UpdateAction.parseExecute(queryString, dataset);
-     String result = this.excutePost(endpoint, urlParameters);
+     String result = this.excutePost(endpoint, urlParameters, isConstruct);
      
-     endtime_cpu = tb_cpu.getCurrentThreadCpuTime();
-     endtime_sys = System.nanoTime();
-     usedtime_cpu = (endtime_cpu - starttime_cpu) * 1e-9;
-     usedtime_sys = (endtime_sys - starttime_sys) * 1e-9;
+//     endtime_cpu = tb_cpu.getCurrentThreadCpuTime();
+//     endtime_sys = System.nanoTime();
+     end = System.currentTimeMillis();
+//     usedtime_cpu = (endtime_cpu - starttime_cpu) * 1e-9;
+//     usedtime_sys = (endtime_sys - starttime_sys) * 1e-9;
+     time = end - Long.valueOf(start);
 
 //     DatasetGraphTxn dsg = sConn.begin(ReadWrite.WRITE) ;
 //     UpdateRequest uquery = UpdateRequest.create(queryString);
@@ -222,13 +290,13 @@ public class SPARQLWrapper {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-        try {
-            outputWriter.write("    Select timesued_cpu = " + sw.usedtime_cpu + " sec.\n");
-            outputWriter.write("    Select timesued_sys = " + sw.usedtime_sys + " sec.\n");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        try {
+//            outputWriter.write("    Select timesued_cpu = " + sw.usedtime_cpu + " sec.\n");
+//            outputWriter.write("    Select timesued_sys = " + sw.usedtime_sys + " sec.\n");
+//        } catch (IOException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
     }
 
 }
