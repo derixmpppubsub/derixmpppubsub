@@ -1,21 +1,25 @@
 package org.deri.xmpppubsub;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+//import java.io.File;
+//import java.io.FileInputStream;
+//import java.io.InputStream;
+//import java.util.Iterator;
+//import java.util.Properties;
 import java.util.ArrayList;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.log4j.BasicConfigurator;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.Affiliation;
-import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.LeafNode;
-import org.jivesoftware.smackx.pubsub.Subscription;
+//import org.jivesoftware.smackx.pubsub.Item;
+//import org.jivesoftware.smackx.pubsub.Subscription;
 
 /**
  * @author Maciej Dabrowski
@@ -24,8 +28,9 @@ import org.jivesoftware.smackx.pubsub.Subscription;
  */
 public class Subscriber extends PubSubClient {
 
-//    public ArrayList<LeafNode> nodesSubscribedTo;
-    public ArrayList<String> nodesSubscribedTo;
+//    public ArrayList<LeafNode> nodes;
+//    public ArrayList<String> nodesSubscribedTo;
+    public HashMap<String, LeafNode> nodeSubscriptions;
     
     public Subscriber(String userName, String password, String xmppserver) 
             throws XMPPException, InterruptedException {
@@ -50,6 +55,7 @@ public class Subscriber extends PubSubClient {
         initNodesSubscribedTo();
     }
 
+    // Not needed to store all nodes in memory, just the node names
 //  public ArrayList<LeafNode> getNodesSubscribedTo() throws XMPPException {
 //      List<Affiliation> affs = mgr.getAffiliations();
 //      for(Affiliation aff : affs ) {
@@ -62,41 +68,56 @@ public class Subscriber extends PubSubClient {
     
     
     public void initNodesSubscribedTo() throws XMPPException {
-//        nodesSubscribedTo = new ArrayList<LeafNode>();
-
-        nodesSubscribedTo = new ArrayList<String>();
+//        nodes = new ArrayList<LeafNode>();
+//        nodesSubscribedTo = new ArrayList<String>();
+        nodeSubscriptions = new HashMap<String, LeafNode>();
         try {
             List<Affiliation> affs = mgr.getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();
-//                LeafNode node = this.getNode(nodeName);
-                logger.debug("jid " + this.getUser() + "is affiliated to node "
+                logger.info(this.getUser() + "is affiliated to node "
                         + nodeName);
-//                nodesSubscribedTo.add(node);
-                nodesSubscribedTo.add(nodeName);
+                LeafNode node = this.getNode(nodeName);
+                nodeSubscriptions.put(nodeName, node);
+//                nodesSubscribedTo.add(nodeName);
             }
         } catch (XMPPException e) {
             logger.info("no affiliations");
         }
     }
 
-    public boolean isSubscribedTo(LeafNode node) {
+    public boolean isSubscribedTo(String nodeName) {
         boolean subscribed;
 //        subscribed = nodesSubscribedTo.contains(node);
-        subscribed = nodesSubscribedTo.contains(node.getId());
+        subscribed = nodeSubscriptions.containsKey(nodeName);
         return subscribed;
     }
     
-    public void subscribeIfNotSubscribedTo(LeafNode node) throws XMPPException {
-        if (!isSubscribedTo(node)) {
-            logger.info("not subscribed");
-            logger.info("trying to subscribe " + this.getUser());
+    public void subscribeIfNotSubscribedTo(String nodeName) throws XMPPException {
+        if (!isSubscribedTo(nodeName)) {
+            LeafNode node = this.getNode(nodeName);
             node.subscribe(this.getUser());
-//            nodesSubscribedTo.add(node);
-            nodesSubscribedTo.add(node.getId());
+//            nodes.add(node);
+//            nodesSubscribedTo.add(node.getId());
+            nodeSubscriptions.put(nodeName, node);
             logger.info(this.getUser() + " subscribed to node " + node.getId());
         } else {
-            logger.info(this.getUser() + " is already subscribed to " + node.getId());
+            logger.info(this.getUser() + " is already subscribed to " + nodeName);
+        }
+    }
+    
+    public void addListenerToNode(String subSeq, 
+            String nodeName, String fileName, String endpoint) 
+            throws XMPPException, IOException {
+        nodeSubscriptions.get(nodeName).addItemEventListener(new ItemEventCoordinator(subSeq, fileName, endpoint));
+//        LeafNode node = this.getNode(nodeName);
+//        node.addItemEventListener(new ItemEventCoordinator(subSeq, fileName, endpoint));
+    }
+    
+    public void addListenerToAllNodes(String subSeq, String fileName, String endpoint) 
+            throws XMPPException, IOException {
+        for(LeafNode node : nodeSubscriptions.values()) {
+            node.addItemEventListener(new ItemEventCoordinator(subSeq, fileName, endpoint));
         }
     }
     
@@ -195,74 +216,34 @@ public class Subscriber extends PubSubClient {
             // turn on the enhanced debugger
             XMPPConnection.DEBUG_ENABLED = true;
 
-        
-            String usage = "Subscriber node <outputfile>";
-            String exampleusage = "testNodeWithPayloadU2";
-
-//        //    String nodeName = args[0];
-//          String  nodeName = "twoSubscribers";
-//            String outputfile = args[1];
+            String fileName = "results.csv";
+            String endpoint = "http://localhost:8000/update/";
             String  nodeName = "node1";
 //            
 //            Subscriber p = new Subscriber("subscriber.properties");
             Subscriber p = new Subscriber("sub1", "sub1pass", "vmuss12.deri.ie");
-//            Subscriber p3 = new Subscriber("testuser4", "testuser4pass", "vmuss12.deri.ie");
+            
+//            LeafNode node = p.getNode(nodeName);
+//            node.addItemEventListener(new ItemEventCoordinator("results.csv"));
+            p.addListenerToNode("sub1of1", nodeName, fileName, endpoint);
+            p.subscribeIfNotSubscribedTo(nodeName);
             
             
-            // Get the node
-            LeafNode node = p.getNode(nodeName);
-//            LeafNode node3 = p3.getNode(nodeName);
             
-
-            node.addItemEventListener(new ItemEventCoordinator("results.csv"));
-            
-//            node.subscribe(username + "@vmuss12.deri.ie");
-            p.subscribeIfNotSubscribedTo(node);
-//            node3.subscribe("testuser4@vmuss12.deri.ie");
-//            p3.subscribeIfNotSubscribedTo(node3);
-            
-            
-        
-    //        DiscoverInfo supportedFeatures = mgr.getSupportedFeatures();
-//            System.out.println(supportedFeatures.toXML());
-                        
-//            List<? extends Subscription> subs = node.getSubscriptions();
-//            
-//            
-//            
-//            System.out.println(" subs: " + subs.size());
-//            for(Subscription sub : subs){
-//                System.out.println("sub-jid: " + sub.getUser() + " id: " + sub.getId());
-//                //node.getSubscriptionOptions("testuser2@vmuss12.deri.ie", sub.getId());
-//                //node.unsubscribe(sub.getUser());
-//            }
-//            
-//            List its = node.getItems(1);
-//            
-//            Iterator itr = its.iterator();
-//            
-//            while (itr.hasNext()){
-//                Item it = (Item) itr.next();
-//                System.out.println(it.toString());
-//            }
-//            
-//            boolean isRunning = true;
-//
-//            while (isRunning) {
-//                Thread.sleep(50);
-//            }
-            
+        } catch (IOException ex) {
+            ex.printStackTrace();
         } catch (XMPPException e) {
             e.printStackTrace();
         
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         
 //        xmppManager.setStatus(true, "Hello everyone");
 //        xmppManager.destroy();
+        }
     }
 }

@@ -13,15 +13,15 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 
+/**
+ * @author Julia Anaya
+ *
+ */
 public class PubSubClient {
 
     protected XMPPConnection connection;
     public PubSubManager mgr;
-    public String userName;
-    public String password;
-    public String domain;
-    public int port;
-    public LeafNode node;
+//    public LeafNode node;
     protected static Logger logger = Logger.getLogger(PubSubClient.class);
 
     public PubSubClient(String userName, String password, String xmppserver)
@@ -30,32 +30,20 @@ public class PubSubClient {
     }
     
     public PubSubClient(String userName, String password, String xmppserver, 
-            boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
+            boolean createAccountIfNotExist) throws XMPPException, 
+            InterruptedException {
         this(userName, password, xmppserver, 5222, createAccountIfNotExist);
     }
     
-    public PubSubClient(String userName, String password, String xmppserver, 
-            int port, boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
-        this.userName = userName;
-        this.password = password;
-        this.domain = xmppserver;
-        this.port = port;
-        initPubSub(createAccountIfNotExist);   
-    }
-
-    public PubSubClient(String fileName) throws IOException, XMPPException, InterruptedException {
+    public PubSubClient(String fileName) throws IOException, XMPPException, 
+            InterruptedException {
         this(fileName, true);
     }
     
     public PubSubClient(String fileName, boolean createAccountIfNotExist) 
             throws IOException, XMPPException, InterruptedException {
-        confFromFile(fileName);
-        initPubSub(createAccountIfNotExist);
-    }
-
-    public void confFromFile(String fileName) throws IOException {
-            
-    //      Configuration config = new PropertiesConfiguration("./xmpppubsub.properties");
+            // the file path was not correct
+    //      Configuration config = new PropertiesConfiguration(fileName);
     //      // declare variables
     //      String username = config.getString("username");
     //      String password = config.getString("password");
@@ -68,36 +56,62 @@ public class PubSubClient {
             logger.debug(filePath);
             InputStream is = new FileInputStream(filePath);
             prop.load(is);
-            userName = prop.getProperty("username");  
-            password = prop.getProperty("password");
-            domain = prop.getProperty("xmppserver");
-            port = Integer.parseInt(prop.getProperty("port")); 
+            String userName = prop.getProperty("username");  
+            String password = prop.getProperty("password");
+            String xmppserver = prop.getProperty("xmppserver");
+            int port = Integer.parseInt(prop.getProperty("port")); 
+            is.close();
+            this.init(userName, password, xmppserver, port, createAccountIfNotExist);
         }
-
-    public void initPubSub(boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
-        ConnectionConfiguration config = new ConnectionConfiguration(domain,port);
+    
+    public PubSubClient(String userName, String password, String domain, 
+            int port, boolean createAccountIfNotExist) throws XMPPException, 
+            InterruptedException {
+        this.init(userName, password, domain, port, createAccountIfNotExist); 
+    }
+    
+    public void init(String userName, String password, String domain, 
+            int port, boolean createAccountIfNotExist) throws XMPPException, 
+            InterruptedException {
+        ConnectionConfiguration config = new ConnectionConfiguration(domain
+                ,port);
         connection = new XMPPConnection(config);
         connection.connect();
 
+        
         try {
-            connection.login(userName, password);
-            logger.info("User " + userName + " logged in to the server " 
+            connection.getAccountManager().createAccount(userName, password);
+            logger.info("User " + userName + " created " 
                     + domain);
         } catch(XMPPException e) {
-            if (createAccountIfNotExist) {
-                connection.getAccountManager().createAccount(userName, password);
-                logger.info("authenticated? " + connection.isAuthenticated());
-                logger.info("Created account for " + userName );
-                // login fail (not-authorized) just after the account creation
-//                Thread.sleep(50);
-                connection.login(userName, password);
-                logger.info("User " + connection.getUser()  + " logged in to the server " 
-                        + domain);
-            } else {
-                System.out.println("account " + userName + "doesn't exist "
-                        + "and is not going to be created");
-            }
+            logger.info("User " + userName + " already created ");
+        }        
+        try {
+            connection.login(userName, password);
+            logger.info("User " + connection.getUser() + " login ");
+        } catch(IllegalStateException e) {
+            logger.info("User " + connection.getUser() + " already login ");
         }
+        
+        
+//        try {
+//            connection.login(userName, password);
+//            logger.info("User " + connection.getUser() 
+//                    + " logged in to the server ");
+//        } catch(XMPPException e) {
+//            if (createAccountIfNotExist) {
+//                connection.getAccountManager().createAccount(userName, password);
+//                logger.info("Created account for " + userName );
+//                // login fail (not-authorized) just after the account creation
+////                Thread.sleep(50);
+//                connection.login(userName, password);
+//                logger.info("User " + connection.getUser()  
+//                        + " logged in to the server ");
+//            } else {
+//                logger.info("account " + userName + "doesn't exist "
+//                        + "and is not going to be created");
+//            }
+//        }
         //Create a pubsub manager using an existing Connection
         mgr = new PubSubManager(connection);
         logger.info("PubSub manager created");
@@ -117,18 +131,21 @@ public class PubSubClient {
      * @return user or null (when not logged in)
      */
     public String getUser() {
-           return connection.getUser();    
-    }
-    
-    public String getJid() {
-        String jid = userName + "@" + domain;
-        return jid;
+        return connection.getUser();    
     }
 
     public LeafNode getNode(String nodename) throws XMPPException {
-        node = (LeafNode) mgr.getNode(nodename);
+        LeafNode node = (LeafNode) mgr.getNode(nodename);
         logger.info("got node " + nodename);
         return node;
     }
-
+    
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            //close();        // close open files
+        } finally {
+            super.finalize();
+        }
+    }
 }

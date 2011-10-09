@@ -20,13 +20,16 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
  */
 public class Publisher extends PubSubClient {
 
+    public LeafNode node;
+    
     public Publisher(String userName, String password, String xmppserver) 
             throws XMPPException, InterruptedException {
         super(userName, password, xmppserver);
     }
     
     public Publisher(String userName, String password, String xmppserver, 
-            int port, boolean createAccountIfNotExist) throws XMPPException, InterruptedException {
+            int port, boolean createAccountIfNotExist) throws XMPPException, 
+            InterruptedException {
         super(userName, password, xmppserver, port, createAccountIfNotExist);           
     }
 
@@ -71,21 +74,20 @@ public class Publisher extends PubSubClient {
     }
 
 
+    public void publishQuery(String query) throws XMPPException {
+            this.publishQuery(query, connection.getUser());
+    }
+    
     /**
      * @return void 
      *
      */
     public void publishQuery(String query, String msgId) throws XMPPException {
-//        String itemID = userName +  
-//        String itemID = msgId +  
-//                + System.currentTimeMillis();
+
         //String itemID = connection.getUser() + System.nanoTime();
-        logger.info(msgId);
         SimplePayload payloadNS = new SimplePayload(
           "query", "http://www.w3.org/TR/sparql11-update/", query);
-        //PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(itemID, payloadNS);
         PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(
-//          connection.getUser() + System.currentTimeMillis(), payloadNS);
           msgId + "," + System.currentTimeMillis(), payloadNS);
         node.send(item);
         logger.info("item sent");
@@ -96,9 +98,6 @@ public class Publisher extends PubSubClient {
      * @param args
      */
     public static void main(String[] args){
-        //TODO when to disconnect
-        //TODO extend method to get triples from sparql endpoint instead of only file? [this is not needed for the component, possible for the evaluation]
-
         try {
             // Set up a simple configuration that logs on the console.
             BasicConfigurator.configure();
@@ -110,36 +109,17 @@ public class Publisher extends PubSubClient {
             XMPPConnection.DEBUG_ENABLED = true;
         
             String confFileName = "xmpppubsub.properties"; 
-        
-            String usage = "Publisher method triples";
-            //String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
-            String triples = "test dupa dupa2";
-//            String exampleusage = "insert example.ttl testNodeWithPayloadU2";
-
-            String method = "insert";
-            
-            //String triplesSource = args[1];
-            String nodeName = "twoSubscribers";
-            logger.debug(method);
-            //logger.debug(triplesSource);
-            logger.debug(nodeName);
-            logger.debug(args.length);
-         
             Publisher p = new Publisher(confFileName);
-    //        p.mgr.deleteNode("twoSubscribers");            
-            // Get the node
+    //        p.mgr.deleteNode("twoSubscribers"); 
+            String nodeName = "node1";
             p.getOrCreateNode(nodeName);
             
+            String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";            
             
-            //String triples = get_triples(fileName);
-            //String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
-            //SPARQLQuery query = new SPARQLQuery(SPARQLQueryType.valueOf(method.toUpperCase()), triplesSource);
-            SPARQLQuery query = new SPARQLQuery(triples);
-            //logger.debug(query.toXML());
-            //p.publish(node, query.toXML());
-            logger.debug(query.toXMLDecodingEntitiesCDATA());
-            p.publishQuery(query.toXML(), "");
-            
+            SPARQLQuery query = new SPARQLQuery();
+            query.wrapTriples(triples);
+            logger.debug(query.toXML());
+            p.publishQuery(query.toXML(), p.getUser());
             logger.info("query sent");
             
             //p.disconnect();

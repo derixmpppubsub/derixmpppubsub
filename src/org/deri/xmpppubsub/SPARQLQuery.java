@@ -1,14 +1,21 @@
 package org.deri.xmpppubsub;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
+//import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+//import org.apache.commons.lang3.StringEscapeUtils;
+import java.io.StringReader;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 //import org.deri.any23.Any23;
 //import org.deri.any23.ExtractionReport;
 //import org.deri.any23.extractor.ExtractionException;
@@ -40,7 +47,8 @@ public class SPARQLQuery {
 	private static SPARQLQueryType defaultQueryType = SPARQLQueryType.INSERT;
 
 	static Logger logger = Logger.getLogger(SPARQLQuery.class);
-
+    
+    public SPARQLQuery() {}
 
 	/**
 	 * Simple method that wraps the triples with default query type
@@ -50,9 +58,9 @@ public class SPARQLQuery {
 	 * @throws ExtractionException
 	 * @throws IOException
 	 */
-	public SPARQLQuery(String triples) throws IOException, QueryTypeException {
-		query = wrapTriples(defaultQueryType, triples);
-	}
+//	public SPARQLQuery(String triples) throws IOException, QueryTypeException {
+//		query = wrapTriples(defaultQueryType, triples);
+//	}
     
 	/**
 	 * 
@@ -75,10 +83,15 @@ public class SPARQLQuery {
 			logger.debug("file was opened but no triples were read");
 
 		// wrap the triples in the query of a given type
-		query = wrapTriples(queryType, triples);
+		wrapTriples(queryType, triples);
 
 		logger.debug(query);
 	}
+    
+	public void wrapTriples(String triples)
+			throws QueryTypeException {
+        wrapTriples(defaultQueryType, triples);
+    }
 
 	/**
 	 * Method returns a query of a defined type that contains triples provided
@@ -89,8 +102,9 @@ public class SPARQLQuery {
 	 * @return
 	 * @throws QueryTypeException
 	 */
-	public String wrapTriples(SPARQLQueryType queryType, String triples)
+	public void wrapTriples(SPARQLQueryType queryType, String triples)
 			throws QueryTypeException {
+        this.triples = triples;
 		String wrappedTriples = null;
 
 		// wrap the query
@@ -106,8 +120,7 @@ public class SPARQLQuery {
 
 		// set actual query type
 		this.queryType = queryType;
-
-		return wrappedTriples;
+        this.query = wrappedTriples;
 	}
 
 	/**
@@ -183,6 +196,18 @@ public class SPARQLQuery {
 //		String n3 = out.toString("UTF-8");
 //		return n3;
 //	}
+    
+    public String fromXML(String xmlquery) throws ParserConfigurationException, SAXException, IOException {  
+        xmlquery = xmlquery.replace("INSERT", "<![CDATA[ INSERT").replace("</query>", "]]></query>");  
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        InputSource is = new InputSource(new StringReader(xmlquery));
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document dom = db.parse(is);	
+        Node queryNode = dom.getElementsByTagName("query").item(0);
+        Element queryElement = (Element)queryNode;
+        query = ((Node)queryElement.getChildNodes().item(0)).getNodeValue();
+        return query;
+    }
 
 	/**
 	 * 
@@ -190,43 +215,42 @@ public class SPARQLQuery {
 	 */
 	public String toXML() {
 		String queryxml;
-		logger.debug("converting the query to XML compliant format");
-		logger.debug(query);
 //		queryxml = beginNS + "<![CDATA[" + "<![CDATA[" + query + "]]>"+ "]]>" + endNS;
         queryxml = beginNS +  "<![CDATA[" + query + "]]>" + endNS;
 		return queryxml;
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public String toXMLDecodingEntities() {
-
-		String queryxml;
-
-		// TODO: why not excapeXML(query)?
-		query = StringEscapeUtils.escapeHtml4(query);
-		queryxml = beginNS + query + endNS;
-
-		logger.info("query converted to XML: " + queryxml);
-
-		return queryxml;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public String toXMLDecodingEntitiesCDATA() {
-		String queryxml;
-		// TODO: why not excapeXML(query)?
-		query = StringEscapeUtils.escapeHtml4(query);
-		queryxml = beginNS + "<![CDATA[ " + query + " ]]>" + endNS;
-		logger.info("query: " + queryxml);
-
-		return queryxml;
-	}
+    //Deprecated
+//	/**
+//	 * 
+//	 * @return
+//	 */
+//	public String toXMLDecodingEntities() {
+//
+//		String queryxml;
+//
+//		// TODO: why not excapeXML(query)?
+//		query = StringEscapeUtils.escapeHtml4(query);
+//		queryxml = beginNS + query + endNS;
+//
+//		logger.info("query converted to XML: " + queryxml);
+//
+//		return queryxml;
+//	}
+//
+//	/**
+//	 * 
+//	 * @return
+//	 */
+//	public String toXMLDecodingEntitiesCDATA() {
+//		String queryxml;
+//		// TODO: why not excapeXML(query)?
+//		query = StringEscapeUtils.escapeHtml4(query);
+//		queryxml = beginNS + "<![CDATA[ " + query + " ]]>" + endNS;
+//		logger.info("query: " + queryxml);
+//
+//		return queryxml;
+//	}
 
 	/**
 	 * Get query RDF content
