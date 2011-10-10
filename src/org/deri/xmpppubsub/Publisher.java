@@ -2,7 +2,7 @@ package org.deri.xmpppubsub;
 import java.io.IOException;
 
 import org.apache.log4j.BasicConfigurator;
-//import org.deri.any23.extractor.ExtractionException;
+import org.apache.log4j.Level;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.AccessModel;
@@ -56,7 +56,7 @@ public class Publisher extends PubSubClient {
         form.setPersistentItems(true);
         form.setPublishModel(PublishModel.open);
         node = (LeafNode) mgr.createNode(nodename, form);
-        logger.info("node " + nodename  + " created");
+        logger.debug("node " + nodename  + " created");
         return node;
     }
 
@@ -83,14 +83,13 @@ public class Publisher extends PubSubClient {
      *
      */
     public void publishQuery(String query, String msgId) throws XMPPException {
-
         //String itemID = connection.getUser() + System.nanoTime();
         SimplePayload payloadNS = new SimplePayload(
           "query", "http://www.w3.org/TR/sparql11-update/", query);
         PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(
           msgId + "," + System.currentTimeMillis(), payloadNS);
         node.send(item);
-        logger.info("item sent");
+        logger.debug("item sent");
     }
     
     
@@ -102,15 +101,14 @@ public class Publisher extends PubSubClient {
             // Set up a simple configuration that logs on the console.
             BasicConfigurator.configure();
             
-            //logger.setLevel(Level.DEBUG);
-            logger.info("Entering application.");
+            logger.setLevel(Level.DEBUG);
+            logger.debug("Entering application.");
     
             // turn on the enhanced debugger
             XMPPConnection.DEBUG_ENABLED = true;
         
             String confFileName = "xmpppubsub.properties"; 
             Publisher p = new Publisher(confFileName);
-    //        p.mgr.deleteNode("twoSubscribers"); 
             String nodeName = "node1";
             p.getOrCreateNode(nodeName);
             
@@ -120,29 +118,20 @@ public class Publisher extends PubSubClient {
             query.wrapTriples(triples);
             logger.debug(query.toXML());
             p.publishQuery(query.toXML(), p.getUser());
-            logger.info("query sent");
+            logger.debug("query sent");
             
             //p.disconnect();
     
             //System.exit(0);
             
         } catch(XMPPException e) {
-            e.printStackTrace();
-            logger.debug(e);
-            
+            logger.error(e);
         } catch(IOException e) {
-            e.printStackTrace();
-            logger.debug(e);
-            
-//        } catch (ExtractionException e) {
-//            e.printStackTrace();
-//            logger.debug(e);
+            logger.error(e);
         } catch (QueryTypeException e) {
-            e.printStackTrace();
-            logger.debug(e.getMessage());
+            logger.error(e);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e);
         }
         
     }

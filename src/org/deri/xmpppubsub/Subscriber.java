@@ -1,25 +1,15 @@
 package org.deri.xmpppubsub;
 
-//import java.io.File;
-//import java.io.FileInputStream;
-//import java.io.InputStream;
-//import java.util.Iterator;
-//import java.util.Properties;
-import java.util.ArrayList;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
 import org.apache.log4j.BasicConfigurator;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.Affiliation;
 import org.jivesoftware.smackx.pubsub.LeafNode;
-//import org.jivesoftware.smackx.pubsub.Item;
-//import org.jivesoftware.smackx.pubsub.Subscription;
 
 /**
  * @author Maciej Dabrowski
@@ -27,9 +17,6 @@ import org.jivesoftware.smackx.pubsub.LeafNode;
  *
  */
 public class Subscriber extends PubSubClient {
-
-//    public ArrayList<LeafNode> nodes;
-//    public ArrayList<String> nodesSubscribedTo;
     public HashMap<String, LeafNode> nodeSubscriptions;
     
     public Subscriber(String userName, String password, String xmppserver) 
@@ -53,36 +40,22 @@ public class Subscriber extends PubSubClient {
             throws IOException, XMPPException, InterruptedException {
         super(fileName, createAccountIfNotExist);
         initNodesSubscribedTo();
-    }
-
-    // Not needed to store all nodes in memory, just the node names
-//  public ArrayList<LeafNode> getNodesSubscribedTo() throws XMPPException {
-//      List<Affiliation> affs = mgr.getAffiliations();
-//      for(Affiliation aff : affs ) {
-//          String nodeName = aff.getNodeId();
-//          LeafNode node = this.getNode(nodeName);
-//          nodesSubscribedTo.add(node);
-//      }
-//      return nodesSubscribedTo;
-//  }
-    
+    }    
     
     public void initNodesSubscribedTo() throws XMPPException {
-//        nodes = new ArrayList<LeafNode>();
-//        nodesSubscribedTo = new ArrayList<String>();
         nodeSubscriptions = new HashMap<String, LeafNode>();
         try {
             List<Affiliation> affs = mgr.getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();
-                logger.info(this.getUser() + "is affiliated to node "
+                logger.debug(this.getUser() + "is affiliated to node "
                         + nodeName);
                 LeafNode node = this.getNode(nodeName);
                 nodeSubscriptions.put(nodeName, node);
 //                nodesSubscribedTo.add(nodeName);
             }
         } catch (XMPPException e) {
-            logger.info("no affiliations");
+            logger.debug("no affiliations");
         }
     }
 
@@ -100,9 +73,9 @@ public class Subscriber extends PubSubClient {
 //            nodes.add(node);
 //            nodesSubscribedTo.add(node.getId());
             nodeSubscriptions.put(nodeName, node);
-            logger.info(this.getUser() + " subscribed to node " + node.getId());
+            logger.debug(this.getUser() + " subscribed to node " + node.getId());
         } else {
-            logger.info(this.getUser() + " is already subscribed to " + nodeName);
+            logger.debug(this.getUser() + " is already subscribed to " + nodeName);
         }
     }
     
@@ -132,7 +105,7 @@ public class Subscriber extends PubSubClient {
 //                    + node.getId());
 //            return true;
 //        } else {
-//            logger.info("jid " + domain + "is not subscribed to node " 
+//            logger.debug("jid " + domain + "is not subscribed to node " 
 //                    + node.getId());
 //            return false;
 //        }
@@ -140,16 +113,16 @@ public class Subscriber extends PubSubClient {
 
 //  Deprecated
 //    public List<? extends Subscription> subscriptionsByJID(LeafNode node) throws XMPPException {
-//        logger.info("subscriptionsByJID");
+//        logger.debug("subscriptionsByJID");
 //        ArrayList<Subscription> jidsubs = new ArrayList<Subscription>();
 //        List<? extends Subscription> subs = node.getSubscriptions();
-//        logger.info("number of subscriptions: " + subs.size() + "to node " 
+//        logger.debug("number of subscriptions: " + subs.size() + "to node " 
 //                + node.getId());
 //        for(Subscription sub : subs){
-//            logger.info("Subscription jid " + sub.getUser() 
+//            logger.debug("Subscription jid " + sub.getUser() 
 //                    + " id " + sub.getId());
 //            if (sub.getUser().equals(this.getUser())) {
-//                logger.info("found subscription for jid " + sub.getUser());
+//                logger.debug("found subscription for jid " + sub.getUser());
 //                jidsubs.add(sub);
 //            }
 //        }
@@ -158,10 +131,10 @@ public class Subscriber extends PubSubClient {
 
 //  Deprecated
 //    public void subscribeIfNotSubscribed(LeafNode node) throws XMPPException {
-//        logger.info("subscribeIfNotSubscribed");
+//        logger.debug("subscribeIfNotSubscribed");
 //        if (!isSubscribed(node)) {
 //            node.subscribe(this.getUser());
-//            logger.info("jid " + this.getUser() + " subscribed to node ");
+//            logger.debug("jid " + this.getUser() + " subscribed to node ");
 //       
 //        }
 //        // temporal delete extra subscriptions
@@ -172,7 +145,7 @@ public class Subscriber extends PubSubClient {
 ////                if(jidsubs.size()>1) {
 ////                    node.unsubscribe(sub.getUser(), sub.getId());
 ////                    jidsubs.remove(sub);
-////                    logger.info("deleted subscription jid " + sub.getUser() 
+////                    logger.debug("deleted subscription jid " + sub.getUser() 
 ////                            + " id " + sub.getId()+ " to node " + node.getId());
 ////                }
 ////            }
@@ -188,7 +161,7 @@ public class Subscriber extends PubSubClient {
 //        List<? extends Subscription> subs = node.getSubscriptions();
 //        for(Subscription sub : subs){
 //            node.unsubscribe(sub.getUser(), sub.getId());
-//            logger.info("deleted jid " + sub.getUser() + 
+//            logger.debug("deleted jid " + sub.getUser() + 
 //                    " subscription to node " + node + " with id " + 
 //                    sub.getId());
 //        }
@@ -198,7 +171,7 @@ public class Subscriber extends PubSubClient {
 //        List<? extends Subscription> jidsubs = this.subscriptionsByJID(node);
 //        for(Subscription sub : jidsubs){
 //            node.unsubscribe(sub.getUser(), sub.getId());
-//            logger.info("deleted subscription jid " + sub.getUser() 
+//            logger.debug("deleted subscription jid " + sub.getUser() 
 //                    + " id " + sub.getId() + " to node " + node.getId());
 //        }
 //    }
@@ -210,21 +183,17 @@ public class Subscriber extends PubSubClient {
     public static void main(String[] args) throws InterruptedException {
         try {
             BasicConfigurator.configure();
-            //logger.setLevel(Level.DEBUG);
-            logger.info("Entering application.");
+            logger.setLevel(Level.DEBUG);
+            logger.debug("Entering application.");
             
             // turn on the enhanced debugger
             XMPPConnection.DEBUG_ENABLED = true;
 
             String fileName = "results.csv";
             String endpoint = "http://localhost:8000/update/";
-            String  nodeName = "node1";
-//            
-//            Subscriber p = new Subscriber("subscriber.properties");
-            Subscriber p = new Subscriber("sub1", "sub1pass", "vmuss12.deri.ie");
+            String  nodeName = "node1";           
+            Subscriber p = new Subscriber("subscriber.properties");
             
-//            LeafNode node = p.getNode(nodeName);
-//            node.addItemEventListener(new ItemEventCoordinator("results.csv"));
             p.addListenerToNode("sub1of1", nodeName, fileName, endpoint);
             p.subscribeIfNotSubscribedTo(nodeName);
             
