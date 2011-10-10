@@ -3,48 +3,18 @@
  */
 package org.deri.xmpppubsub;
 import java.io.*;
-//import java.lang.management.ManagementFactory;
-//import java.lang.management.ThreadMXBean;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//import com.hp.hpl.jena.query.Query;
-//import com.hp.hpl.jena.query.QueryExecution;
-//import com.hp.hpl.jena.query.QueryExecutionFactory;
-//import com.hp.hpl.jena.query.QueryFactory;
-//import com.hp.hpl.jena.query.QuerySolution;
-//import com.hp.hpl.jena.query.ResultSet;
-//import com.hp.hpl.jena.query.DatasetFactory;
-//import com.hp.hpl.jena.query.Dataset;
-//import com.hp.hpl.jena.query.QueryExecutionFactory;
-//import com.hp.hpl.jena.rdf.model.Model;
-//import com.hp.hpl.jena.rdf.model.Resource;
-//import com.hp.hpl.jena.vocabulary.RDF;
-//
-//import com.hp.hpl.jena.query.ResultSetFormatter;
-//import com.hp.hpl.jena.rdf.model.ModelFactory;
-//import com.hp.hpl.jena.update.UpdateRequest;
-//import com.hp.hpl.jena.util.FileManager;
-//import com.hp.hpl.jena.vocabulary.DC;
-//import com.hp.hpl.jena.vocabulary.RDFS;
-//import com.hp.hpl.jena.vocabulary.XSD;
-//import com.hp.hpl.jena.update.UpdateAction;
-
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-//import sun.misc.IOUtils;
 /**
  * @author Julia Anaya
  *
  */
 public class SPARQLWrapper {
     public Long time;
-//    public double usedtime_cpu, usedtime_sys;
-//    ThreadMXBean tb_cpu = ManagementFactory.getThreadMXBean();
 	static Logger logger = Logger.getLogger(SPARQLWrapper.class);
 
     public SPARQLWrapper() {
@@ -86,11 +56,11 @@ public class SPARQLWrapper {
           response.append('\r');
         }
         rd.close();
-        logger.debug(response.toString());
+        //logger.debug(response.toString());
         return response.toString();
 //        }
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.error(e);
         return null;
       } finally {
         if(connection != null) {
@@ -156,7 +126,7 @@ public class SPARQLWrapper {
      } else {
         urlParameters = "query=" + URLEncoder.encode(queryString, "UTF-8");
      }
-     logger.info(urlParameters);
+     //logger.debug(urlParameters);
 //     long starttime_cpu, endtime_cpu, starttime_sys, endtime_sys, 
      long start, end;
 //     starttime_sys = System.nanoTime();
@@ -196,13 +166,12 @@ public class SPARQLWrapper {
         String endpoint= "http://localhost:8000/update/";
         SPARQLWrapper sw = new SPARQLWrapper();
         String queryString = "INSERT DATA {" + triples + "}";
-        logger.info(queryString);
+        logger.debug(queryString);
         try {
             String result = sw.runQuery(queryString, endpoint, true);
             System.out.println(result);
-        } catch (UnsupportedEncodingException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e);
         }
 //        try {
 //            outputWriter.write("    Select timesued_cpu = " + sw.usedtime_cpu + " sec.\n");

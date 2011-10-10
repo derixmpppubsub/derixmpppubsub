@@ -2,6 +2,7 @@ package org.deri.xmpppubsub;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.log4j.Logger;
@@ -21,7 +22,7 @@ public class ItemEventCoordinator implements ItemEventListener {
     String subSeq;
     
     public ItemEventCoordinator(String subSeq, String fileName, String endpoint) {
-        logger.info("new itemeventcoordinator");
+        logger.debug("new itemeventcoordinator");
         this.fileName = fileName;
         this.endpoint = endpoint;
         this.subSeq = subSeq;
@@ -31,20 +32,20 @@ public class ItemEventCoordinator implements ItemEventListener {
     public void handlePublishedItems(ItemPublishEvent items) {
         long end = System.currentTimeMillis();
 //        long end = System.nanoTime();
-        logger.info("en listener");
+        logger.debug("en listener");
         
         try {
             SPARQLQuery sq = new SPARQLQuery();
             SPARQLWrapper sw = new SPARQLWrapper();
             FileWriter writer = new FileWriter(fileName, true);
             String[] columns = new String[4];
-            String itemId,pubSeq, nTriples, pTime,  start, query, result;
+            String itemId,pubSeq, nTriples, pTime,  start, query, result, msgSize, line;
             Long msgTime, totalTime;
                     
             List<Item> its = items.getItems();
             for(Item item : its) {
                 itemId = item.getId();
-                logger.info(itemId);
+                logger.debug("received item id" + itemId);
                 
                 // msgId format:
 //                String msgId = "pub" + i + "of" + numberOfPublishers 
@@ -59,41 +60,28 @@ public class ItemEventCoordinator implements ItemEventListener {
                 start = columns[3];
                 
                 msgTime = end - Long.valueOf(start);
-                logger.info("elapsed time: " + msgTime);
+                //logger.debug("elapsed time: " + msgTime);
 
                 query = sq.fromXML(item.toXML());
-                logger.info(query);
-                    
-                
+                //logger.debug("query: " + query);                
                 result = sw.runQuery(query, endpoint, true);
-                logger.info(result);   
                 
                 totalTime = Long.valueOf(pTime) + msgTime + sw.time;
-                logger.info(totalTime);
+                //logger.debug("total time:" + totalTime);
                 
+                msgSize = Integer.toString(item.toString().length());
                 // file header format:
                 // "subscriber seq, publisher seq,triples/msg,msg size(chars),publisher store time (ms),publish time (ms),subscriber store time (ms),total time (msg)"
-                
-                writer.write(subSeq);
-                writer.write(',');
-                writer.write(pubSeq);
-                writer.write(',');
-                writer.write(nTriples);
-                writer.write(',');
-                writer.write(Integer.toString(item.toString().length()));
-                writer.write(',');
-                writer.write(pTime);
-                writer.write(',');
-                writer.write(msgTime.toString());
-                writer.write(',');
-                writer.write(sw.time.toString());
-                writer.write(',');
-                writer.write(totalTime.toString());
-                writer.write('\n');
+                line = subSeq + "," + pubSeq + "," + nTriples + "," + msgSize 
+                      + "," + pTime + "," + msgTime.toString() + "," 
+                      + sw.time.toString() + "," + totalTime.toString() + "\n";
+                writer.write(line);
                 writer.flush();
                 writer.close();
             }
         } catch (NumberFormatException e) {
+            logger.error(e);
+        } catch (UnsupportedEncodingException e) {
             logger.error(e);
         } catch (IOException e) {
             logger.error(e);

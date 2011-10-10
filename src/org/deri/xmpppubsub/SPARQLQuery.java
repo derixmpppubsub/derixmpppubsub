@@ -1,12 +1,10 @@
 package org.deri.xmpppubsub;
 
 import java.io.BufferedReader;
-//import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-//import org.apache.commons.lang3.StringEscapeUtils;
 import java.io.StringReader;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -16,13 +14,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-//import org.deri.any23.Any23;
-//import org.deri.any23.ExtractionReport;
-//import org.deri.any23.extractor.ExtractionException;
-//import org.deri.any23.source.DocumentSource;
-//import org.deri.any23.source.FileDocumentSource;
-//import org.deri.any23.writer.NTriplesWriter;
-//import org.deri.any23.writer.TripleHandler;
 
 /**
  * @author Maciej Dabrowski
@@ -215,42 +206,9 @@ public class SPARQLQuery {
 	 */
 	public String toXML() {
 		String queryxml;
-//		queryxml = beginNS + "<![CDATA[" + "<![CDATA[" + query + "]]>"+ "]]>" + endNS;
         queryxml = beginNS +  "<![CDATA[" + query + "]]>" + endNS;
 		return queryxml;
 	}
-
-    //Deprecated
-//	/**
-//	 * 
-//	 * @return
-//	 */
-//	public String toXMLDecodingEntities() {
-//
-//		String queryxml;
-//
-//		// TODO: why not excapeXML(query)?
-//		query = StringEscapeUtils.escapeHtml4(query);
-//		queryxml = beginNS + query + endNS;
-//
-//		logger.info("query converted to XML: " + queryxml);
-//
-//		return queryxml;
-//	}
-//
-//	/**
-//	 * 
-//	 * @return
-//	 */
-//	public String toXMLDecodingEntitiesCDATA() {
-//		String queryxml;
-//		// TODO: why not excapeXML(query)?
-//		query = StringEscapeUtils.escapeHtml4(query);
-//		queryxml = beginNS + "<![CDATA[ " + query + " ]]>" + endNS;
-//		logger.info("query: " + queryxml);
-//
-//		return queryxml;
-//	}
 
 	/**
 	 * Get query RDF content
@@ -319,14 +277,9 @@ public class SPARQLQuery {
 			SPARQLQuery query = new SPARQLQuery(method, triplesSource);
 			System.out.println(query.toXML());
 		} catch (IOException e) {
-			e.printStackTrace();
-			logger.debug(e.getMessage());
-//		} catch (ExtractionException e) {
-//			e.printStackTrace();
-//			logger.debug(e.getMessage());
+			logger.error(e);
 		} catch (QueryTypeException e) {
-			e.printStackTrace();
-			logger.debug(e.getMessage());
+			logger.error(e);
 		}
 	}
 }

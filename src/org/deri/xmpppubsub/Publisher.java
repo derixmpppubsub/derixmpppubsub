@@ -55,6 +55,7 @@ public class Publisher extends PubSubClient {
         form.setNotifyRetract(true);
         form.setPersistentItems(true);
         form.setPublishModel(PublishModel.open);
+        //logger.debug(form.getMaxPayloadSize);
         node = (LeafNode) mgr.createNode(nodename, form);
         logger.debug("node " + nodename  + " created");
         return node;
@@ -88,6 +89,7 @@ public class Publisher extends PubSubClient {
           "query", "http://www.w3.org/TR/sparql11-update/", query);
         PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(
           msgId + "," + System.currentTimeMillis(), payloadNS);
+        //logger.debug(item.toString());
         node.send(item);
         logger.debug("item sent");
     }
