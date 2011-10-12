@@ -48,8 +48,8 @@ public class Subscriber extends PubSubClient {
             List<Affiliation> affs = mgr.getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();
-                logger.debug(this.getUser() + "is affiliated to node "
-                        + nodeName);
+//                logger.debug(this.getUser() + "is affiliated to node "
+//                        + nodeName);
                 LeafNode node = this.getNode(nodeName);
                 nodeSubscriptions.put(nodeName, node);
 //                nodesSubscribedTo.add(nodeName);
@@ -75,7 +75,7 @@ public class Subscriber extends PubSubClient {
             nodeSubscriptions.put(nodeName, node);
             logger.debug(this.getUser() + " subscribed to node " + node.getId());
         } else {
-            logger.debug(this.getUser() + " is already subscribed to " + nodeName);
+//            logger.debug(this.getUser() + " is already subscribed to " + nodeName);
         }
     }
     

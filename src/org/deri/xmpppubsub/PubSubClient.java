@@ -114,7 +114,7 @@ public class PubSubClient {
 //        }
         //Create a pubsub manager using an existing Connection
         mgr = new PubSubManager(connection);
-        logger.info("PubSub manager created");
+//        logger.info("PubSub manager created");
     }
 
     /**
@@ -136,7 +136,7 @@ public class PubSubClient {
 
     public LeafNode getNode(String nodename) throws XMPPException {
         LeafNode node = (LeafNode) mgr.getNode(nodename);
-        logger.info("got node " + nodename);
+//        logger.info("got node " + nodename);
         return node;
     }
     

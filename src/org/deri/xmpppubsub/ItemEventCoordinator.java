@@ -22,7 +22,7 @@ public class ItemEventCoordinator implements ItemEventListener {
     String subSeq;
     
     public ItemEventCoordinator(String subSeq, String fileName, String endpoint) {
-        logger.debug("new itemeventcoordinator");
+//        logger.debug("new itemeventcoordinator");
         this.fileName = fileName;
         this.endpoint = endpoint;
         this.subSeq = subSeq;
@@ -32,7 +32,7 @@ public class ItemEventCoordinator implements ItemEventListener {
     public void handlePublishedItems(ItemPublishEvent items) {
         long end = System.currentTimeMillis();
 //        long end = System.nanoTime();
-        logger.debug("en listener");
+//        logger.debug("en listener");
         
         try {
             SPARQLQuery sq = new SPARQLQuery();
