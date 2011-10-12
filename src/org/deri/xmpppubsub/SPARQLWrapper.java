@@ -41,10 +41,10 @@ public class SPARQLWrapper {
         wr.writeBytes (urlParameters);
         wr.flush ();
         wr.close ();
-        long end = System.currentTimeMillis();
         //Get Response
         int status = connection.getResponseCode();
         String message = connection.getResponseMessage();
+        long end = System.currentTimeMillis();
         logger.debug("response status [" + status + "] message [" + message + "]");
 
         InputStream is = connection.getInputStream();
@@ -59,7 +59,7 @@ public class SPARQLWrapper {
         //logger.debug(response.toString());
 //        return response.toString();
 //        Object[] ret = {response.toString(), end-start};
-//        return ret;        
+//        return ret;      
         return new Object[]{response.toString(), end-start};
 //        }
       } catch (Exception e) {
