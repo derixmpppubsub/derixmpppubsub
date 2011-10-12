@@ -14,12 +14,11 @@ import org.apache.log4j.Logger;
  *
  */
 public class SPARQLWrapper {
-    public Long time;
+//    public final Long time=null;
+//    public final String result=null;
 	static Logger logger = Logger.getLogger(SPARQLWrapper.class);
 
-    public SPARQLWrapper() {
-    }
-    public static String runRequest(String targetURL, String urlParameters, 
+    public static Object[] runRequest(String targetURL, String urlParameters, 
             boolean isConstruct) {
       URL url;
       HttpURLConnection connection = null;  
@@ -36,12 +35,13 @@ public class SPARQLWrapper {
         connection.setDoOutput(true);
 
         //Send request
+        long start = System.currentTimeMillis();
         DataOutputStream wr = new DataOutputStream (
                     connection.getOutputStream ());
         wr.writeBytes (urlParameters);
         wr.flush ();
         wr.close ();
-
+        long end = System.currentTimeMillis();
         //Get Response
         int status = connection.getResponseCode();
         String message = connection.getResponseMessage();
@@ -57,7 +57,10 @@ public class SPARQLWrapper {
         }
         rd.close();
         //logger.debug(response.toString());
-        return response.toString();
+//        return response.toString();
+//        Object[] ret = {response.toString(), end-start};
+//        return ret;        
+        return new Object[]{response.toString(), end-start};
 //        }
       } catch (Exception e) {
         logger.error(e);
@@ -117,7 +120,7 @@ public class SPARQLWrapper {
 //     UpdateProcessor proc = UpdateExecutionFactory.create(uquery, dsg) ;
     //}
     
-    public String runQuery(String queryString, String endpoint, 
+    public static  Object[] runQuery(String queryString, String endpoint, 
             boolean update) throws UnsupportedEncodingException {
      boolean isConstruct = queryString.startsWith("CONSTRUCT");
      String urlParameters;
@@ -126,24 +129,8 @@ public class SPARQLWrapper {
      } else {
         urlParameters = "query=" + URLEncoder.encode(queryString, "UTF-8");
      }
-     //logger.debug(urlParameters);
-//     long starttime_cpu, endtime_cpu, starttime_sys, endtime_sys, 
-     long start, end;
-//     starttime_sys = System.nanoTime();
-//     starttime_cpu = tb_cpu.getCurrentThreadCpuTime();
-     start = System.currentTimeMillis();
-//     UpdateAction.parseExecute(queryString, dataset);
-     String result = this.runRequest(endpoint, urlParameters, isConstruct);
-     
-//     endtime_cpu = tb_cpu.getCurrentThreadCpuTime();
-//     endtime_sys = System.nanoTime();
-     end = System.currentTimeMillis();
-//     usedtime_cpu = (endtime_cpu - starttime_cpu) * 1e-9;
-//     usedtime_sys = (endtime_sys - starttime_sys) * 1e-9;
-     time = end - Long.valueOf(start);
-     
 
-     return result;
+     return SPARQLWrapper.runRequest(endpoint, urlParameters, isConstruct);
     }
     
     /**
@@ -164,12 +151,13 @@ public class SPARQLWrapper {
         }
         String triples = "<http://ecp-alpha/semantic/post/1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .";
         String endpoint= "http://localhost:8000/update/";
-        SPARQLWrapper sw = new SPARQLWrapper();
+//        SPARQLWrapper sw = new SPARQLWrapper();
         String queryString = "INSERT DATA {" + triples + "}";
         logger.debug(queryString);
         try {
-            String result = sw.runQuery(queryString, endpoint, true);
-            System.out.println(result);
+//            String result = sw.runQuery(queryString, endpoint, true);
+            Object[] ret = SPARQLWrapper.runQuery(queryString, endpoint, true);
+            logger.info((String)ret[0]);
         } catch (UnsupportedEncodingException e) {
             logger.error(e);
         }

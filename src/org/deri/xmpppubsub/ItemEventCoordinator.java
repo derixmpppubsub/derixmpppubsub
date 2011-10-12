@@ -36,11 +36,11 @@ public class ItemEventCoordinator implements ItemEventListener {
         
         try {
             SPARQLQuery sq = new SPARQLQuery();
-            SPARQLWrapper sw = new SPARQLWrapper();
+//            SPARQLWrapper sw = new SPARQLWrapper();
             FileWriter writer = new FileWriter(fileName, true);
             String[] columns = new String[4];
             String itemId,pubSeq, nTriples, pTime,  start, query, result, msgSize, line;
-            Long msgTime, totalTime;
+            Long insertTime, msgTime, totalTime;
                     
             List<Item> its = items.getItems();
             for(Item item : its) {
@@ -64,9 +64,12 @@ public class ItemEventCoordinator implements ItemEventListener {
 
                 query = sq.fromXML(item.toXML());
                 //logger.debug("query: " + query);                
-                result = sw.runQuery(query, endpoint, true);
+//                result = sw.runQuery(query, endpoint, true);
+                Object[] ret = SPARQLWrapper.runQuery(query, endpoint, false);
+                insertTime = (Long)ret[1];
+//                result = (String)ret[0];
                 
-                totalTime = Long.valueOf(pTime) + msgTime + sw.time;
+                totalTime = Long.valueOf(pTime) + msgTime + insertTime;
                 //logger.debug("total time:" + totalTime);
                 
                 msgSize = Integer.toString(item.toString().length());
@@ -74,7 +77,7 @@ public class ItemEventCoordinator implements ItemEventListener {
                 // "subscriber seq, publisher seq,triples/msg,msg size(chars),publisher store time (ms),publish time (ms),subscriber store time (ms),total time (msg)"
                 line = subSeq + "," + pubSeq + "," + nTriples + "," + msgSize 
                       + "," + pTime + "," + msgTime.toString() + "," 
-                      + sw.time.toString() + "," + totalTime.toString() + "\n";
+                      + insertTime.toString() + "," + totalTime.toString() + "\n";
                 writer.write(line);
                 writer.flush();
                 writer.close();
