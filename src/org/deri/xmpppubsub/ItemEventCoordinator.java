@@ -65,7 +65,7 @@ public class ItemEventCoordinator implements ItemEventListener {
                 query = sq.fromXML(item.toXML());
                 //logger.debug("query: " + query);                
 //                result = sw.runQuery(query, endpoint, true);
-                Object[] ret = SPARQLWrapper.runQuery(query, endpoint, false);
+                Object[] ret = SPARQLWrapper.runQuery(query, endpoint, true);
                 insertTime = (Long)ret[1];
 //                result = (String)ret[0];
                 
