@@ -9,19 +9,23 @@ import java.net.URLEncoder;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-/**
- * @author Julia Anaya
- *
- */
+
 public class SPARQLWrapper {
 //    public final Long time=null;
 //    public final String result=null;
 	static Logger logger = Logger.getLogger(SPARQLWrapper.class);
 
-    public static Object[] runRequest(String targetURL, String urlParameters, 
+    /**
+     *
+     * @param targetURL
+     * @param urlParameters
+     * @param isConstruct
+     * @return
+     */
+    public static Object[] runRequest(String targetURL, String urlParameters,
             boolean isConstruct) {
       URL url;
-      HttpURLConnection connection = null;  
+      HttpURLConnection connection = null;
       try {
         //Create connection
         url = new URL(targetURL);
@@ -50,7 +54,7 @@ public class SPARQLWrapper {
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
         String line;
-        StringBuffer response = new StringBuffer(); 
+        StringBuffer response = new StringBuffer();
         while((line = rd.readLine()) != null) {
           response.append(line);
           response.append('\r');
@@ -59,7 +63,7 @@ public class SPARQLWrapper {
         //logger.debug(response.toString());
 //        return response.toString();
 //        Object[] ret = {response.toString(), end-start};
-//        return ret;      
+//        return ret;
         return new Object[]{response.toString(), end-start};
 //        }
       } catch (Exception e) {
@@ -67,12 +71,12 @@ public class SPARQLWrapper {
         return null;
       } finally {
         if(connection != null) {
-          connection.disconnect(); 
+          connection.disconnect();
         }
       }
     }
-    
-//    public String runQuery(String queryString, String endpoint, 
+
+//    public String runQuery(String queryString, String endpoint,
 //            boolean update) throws UnsupportedEncodingException {
      //Model model = ModelFactory.createMemModelMaker().createModel();
 //     Query query = QueryFactory.create(queryString);
@@ -81,10 +85,10 @@ public class SPARQLWrapper {
 //
 //     starttime_sys = System.nanoTime();
 //     starttime_cpu = tb_cpu.getCurrentThreadCpuTime();
-        
+
 //     QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query);
 //     //ResultSetFormatter.out(System.out, qExec.execSelect(), query) ;
-        
+
 //      try {
 //          ResultSet results = qexec.execSelect();
 //          endtime_cpu = tb_cpu.getCurrentThreadCpuTime();
@@ -93,7 +97,7 @@ public class SPARQLWrapper {
 //          usedtime_sys = (endtime_sys - starttime_sys) * 1e-9;
 ////          outputWriter.write("    Select timesued_cpu = " + usedtime_cpu + " sec.\n");
 ////          outputWriter.write("    Select timesued_sys = " + usedtime_sys + " sec.\n");
-//          
+//
 //          for (; results.hasNext();) {
 //              QuerySolution soln = results.nextSolution() ;
 ////              Resource r = soln.getResource("emp") ; // Get a result variable - must be a resource
@@ -106,7 +110,7 @@ public class SPARQLWrapper {
 //      finally {
 //         qexec.close();
 //      }
-      
+
      // But updates do not support this kind of sparqlService method
      // Illegal:
      // But dataset is a Dataset object, not the uri.
@@ -119,8 +123,16 @@ public class SPARQLWrapper {
 //     UpdateRequest uquery = UpdateRequest.create(queryString);
 //     UpdateProcessor proc = UpdateExecutionFactory.create(uquery, dsg) ;
     //}
-    
-    public static  Object[] runQuery(String queryString, String endpoint, 
+
+    /**
+     *
+     * @param queryString
+     * @param endpoint
+     * @param update
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public static  Object[] runQuery(String queryString, String endpoint,
             boolean update) throws UnsupportedEncodingException {
      boolean isConstruct = queryString.startsWith("CONSTRUCT");
      String urlParameters;
@@ -132,12 +144,12 @@ public class SPARQLWrapper {
 
      return SPARQLWrapper.runRequest(endpoint, urlParameters, isConstruct);
     }
-    
+
     /**
      * @param args
      * void
-     * @throws UnsupportedEncodingException 
-     * 
+     * @throws UnsupportedEncodingException
+     *
      */
     public static void main(String[] args) {
 		BasicConfigurator.configure();
@@ -161,13 +173,6 @@ public class SPARQLWrapper {
         } catch (UnsupportedEncodingException e) {
             logger.error(e);
         }
-//        try {
-//            outputWriter.write("    Select timesued_cpu = " + sw.usedtime_cpu + " sec.\n");
-//            outputWriter.write("    Select timesued_sys = " + sw.usedtime_sys + " sec.\n");
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
     }
 
 }

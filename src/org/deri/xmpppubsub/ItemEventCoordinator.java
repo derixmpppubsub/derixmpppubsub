@@ -18,22 +18,32 @@ import org.xml.sax.SAXException;
 
 public class ItemEventCoordinator implements ItemEventListener {
     static Logger logger = Logger.getLogger(ItemEventCoordinator.class);
-    String fileName;
-    String endpoint;
-    String subSeq;
+    String subName;
+//    String fileName;
+//    String endpoint;
+//    public static String fileHeadersTemplate = "nTests,nSubs,nPubs,nTriples,"
+//            + "subName,pubName,tPubStore, tPushMsg, tSubStore, tTotal\n";
+//    public static String msgIdTemplate = "%s,%s,%s,%s,%s,%s,%s";
+//                    //nTests,nSubs,nPubs,nTriples,pubName,tPubStore,tStartMsg
+//    public static int nColMsgId = 7;
 
-    /**
-     *
-     * @param subSeq
-     * @param fileName
-     * @param endpoint
-     */
-    public ItemEventCoordinator(String subSeq, String fileName, String endpoint) {
+    public ItemEventCoordinator(String subName) {
 //        logger.debug("new itemeventcoordinator");
-        this.fileName = fileName;
-        this.endpoint = endpoint;
-        this.subSeq = subSeq;
+        this.subName = subName;
     }
+
+//    /**
+//     *
+//     * @param subSeq
+//     * @param fileName
+//     * @param endpoint
+//     */
+//    public ItemEventCoordinator(String subName, String fileName, String endpoint) {
+////        logger.debug("new itemeventcoordinator");
+//        this.subName = subName;
+//        this.fileName = fileName;
+//        this.endpoint = endpoint;
+//    }
 
     /**
      *
@@ -45,48 +55,67 @@ public class ItemEventCoordinator implements ItemEventListener {
 //        long end = System.nanoTime();
 //        logger.debug("en listener");
 
+        String fileHeadersTemplate = "nTests,nSubs,nPubs,nTriples,sizeMsg"
+            + "subName,pubName,tPubStore,tPushMsg,tSubStore,tTotal\n";
+        String fileNameTemplate = "results/nSubs%snPubs%snTriples%s.csv";
+        String msgIdTemplate = "%s,%s,%s,%s,%s,%s,%s";
+//                    //nTests,nSubs,nPubs,nTriples,pubName,tPubStore,tStartMsg
+        String fileLineTemplate = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n";
+        String fileName;
+        String endpoint = "http://localhost:8000/update/";
+        int nColMsgId = 7;
+        String[] columns = new String[nColMsgId];
+        String nTests, nSubs, nPubs, nTriples, pubName, tPubStore, tStartMsg;
+        String itemId, query, sizeMsg, line;
+        Long tSubStore, tMsg, tTotal;
+
         try {
             SPARQLQuery sq = new SPARQLQuery();
 //            SPARQLWrapper sw = new SPARQLWrapper();
-            FileWriter writer = new FileWriter(fileName, true);
-            String[] columns = new String[4];
-            String itemId,pubSeq, nTriples, pTime,  start, query, result, msgSize, line;
-            Long insertTime, msgTime, totalTime;
 
             List<Item> its = items.getItems();
             for(Item item : its) {
                 itemId = item.getId();
-                logger.debug("received item id" + itemId);
-
-                // msgId format:
-//                String msgId = "pub" + i + "of" + numberOfPublishers
-//                + ",triples" + numberOfTriples + ",ctime" + time.toString();
+//                logger.debug("received item id" + itemId);
 
                 columns = itemId.split(",");
-                pubSeq = columns[0];
-                nTriples = columns[1];
-                pTime = columns[2];
-                start = columns[3];
+                nTests = columns[0];
+                nSubs = columns[1];
+                nPubs = columns[2];
+                nTriples = columns[3];
+                pubName = columns[4];
+                tPubStore = columns[5];
+                tStartMsg = columns[6];
 
-                msgTime = end - Long.valueOf(start);
+                tMsg = end - Long.valueOf(tStartMsg);
                 //logger.debug("elapsed time: " + msgTime);
 
                 query = sq.fromXML(item.toXML());
                 //logger.debug("query: " + query);
 //                result = sw.runQuery(query, endpoint, true);
+
                 Object[] ret = SPARQLWrapper.runQuery(query, endpoint, true);
-                insertTime = (Long)ret[1];
+                tSubStore = (Long)ret[1];
 //                result = (String)ret[0];
 
-                totalTime = Long.valueOf(pTime) + msgTime + insertTime;
+                tTotal = Long.valueOf(tPubStore) + tMsg + tSubStore;
                 //logger.debug("total time:" + totalTime);
 
-                msgSize = Integer.toString(item.toString().length());
-                // file header format:
-                // "subscriber seq, publisher seq,triples/msg,msg size(chars),publisher store time (ms),publish time (ms),subscriber store time (ms),total time (msg)"
-                line = subSeq + "," + pubSeq + "," + nTriples + "," + msgSize.toString()
-                      + "," + pTime + "," + msgTime.toString() + ","
-                      + insertTime.toString() + "," + totalTime.toString() + "\n";
+                sizeMsg = Integer.toString(item.toString().length());
+
+//                line = nSubs + "," + nPubs + "," + nTriples + "," +
+//                        subName + "," + pubName + "," + sizeMsg.toString() +
+//                        "," + tPubStore + "," + tMsg.toString() + ","+
+//                        tSubStore.toString() + "," + tTotal.toString() + "\n";
+
+                line = String.format(fileLineTemplate, nTests, nSubs, nPubs, nTriples,
+                        sizeMsg.toString(), subName, pubName, tPubStore,
+                        tMsg.toString(), tSubStore.toString(), tTotal.toString());
+
+                fileName = String.format(fileNameTemplate, nSubs, nPubs, nTriples);
+                // if file doesnt exist, create headers
+                FileWriter writer = new FileWriter(fileName, true);
+
                 writer.write(line);
                 writer.flush();
                 writer.close();

@@ -21,27 +21,60 @@ import org.jivesoftware.smackx.pubsub.SimplePayload;
 public class Publisher extends PubSubClient {
 
     public LeafNode node;
-    
-    public Publisher(String userName, String password, String xmppserver) 
+
+    /**
+     *
+     * @param userName
+     * @param password
+     * @param xmppserver
+     * @throws XMPPException
+     * @throws InterruptedException
+     */
+    public Publisher(String userName, String password, String xmppserver)
             throws XMPPException, InterruptedException {
         super(userName, password, xmppserver);
     }
-    
-    public Publisher(String userName, String password, String xmppserver, 
-            int port, boolean createAccountIfNotExist) throws XMPPException, 
+
+    /**
+     *
+     * @param userName
+     * @param password
+     * @param xmppserver
+     * @param port
+     * @param createAccountIfNotExist
+     * @throws XMPPException
+     * @throws InterruptedException
+     */
+    public Publisher(String userName, String password, String xmppserver,
+            int port, boolean createAccountIfNotExist) throws XMPPException,
             InterruptedException {
-        super(userName, password, xmppserver, port, createAccountIfNotExist);           
+        super(userName, password, xmppserver, port, createAccountIfNotExist);
     }
 
+    /**
+     *
+     * @param fileName
+     * @throws IOException
+     * @throws XMPPException
+     * @throws InterruptedException
+     */
     public Publisher(String fileName) throws IOException, XMPPException, InterruptedException {
         super(fileName);
     }
-    
-    public Publisher(String fileName, boolean createAccountIfNotExist) 
+
+    /**
+     *
+     * @param fileName
+     * @param createAccountIfNotExist
+     * @throws IOException
+     * @throws XMPPException
+     * @throws InterruptedException
+     */
+    public Publisher(String fileName, boolean createAccountIfNotExist)
             throws IOException, XMPPException, InterruptedException {
         super(fileName, createAccountIfNotExist);
     }
-    
+
     /**
      * The method created a node with a given name
      * @param nodename - name of the node to be created
@@ -62,8 +95,10 @@ public class Publisher extends PubSubClient {
     }
 
     /**
-     * @return void 
      *
+     * @param nodename
+     * @return
+     * @throws XMPPException
      */
     public LeafNode getOrCreateNode(String nodename) throws XMPPException {
         try {
@@ -78,10 +113,12 @@ public class Publisher extends PubSubClient {
     public void publishQuery(String query) throws XMPPException {
             this.publishQuery(query, connection.getUser());
     }
-    
+
     /**
-     * @return void 
      *
+     * @param query
+     * @param msgId
+     * @throws XMPPException
      */
     public void publishQuery(String query, String msgId) throws XMPPException {
         //String itemID = connection.getUser() + System.nanoTime();
@@ -91,41 +128,39 @@ public class Publisher extends PubSubClient {
           msgId + "," + System.currentTimeMillis(), payloadNS);
         //logger.debug(item.toString());
         node.send(item);
-        logger.debug("item sent");
+//        logger.debug("item sent");
     }
-    
-    
+
+
     /**
      * @param args
      */
     public static void main(String[] args){
         try {
-            // Set up a simple configuration that logs on the console.
             BasicConfigurator.configure();
-            
+
             logger.setLevel(Level.DEBUG);
             logger.debug("Entering application.");
-    
-            // turn on the enhanced debugger
+
             XMPPConnection.DEBUG_ENABLED = true;
-        
-            String confFileName = "xmpppubsub.properties"; 
+
+            String confFileName = "xmpppubsub.properties";
             Publisher p = new Publisher(confFileName);
             String nodeName = "node1";
             p.getOrCreateNode(nodeName);
-            
-            String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";            
-            
+
+            String triples = "<http://example/book1> dc:title 'A new book' ; dc:creator 'A.N. Other' .";
+
             SPARQLQuery query = new SPARQLQuery();
             query.wrapTriples(triples);
             logger.debug(query.toXML());
             p.publishQuery(query.toXML(), p.getUser());
             logger.debug("query sent");
-            
+
             //p.disconnect();
-    
+
             //System.exit(0);
-            
+
         } catch(XMPPException e) {
             logger.error(e);
         } catch(IOException e) {
@@ -135,6 +170,6 @@ public class Publisher extends PubSubClient {
         } catch (InterruptedException e) {
             logger.error(e);
         }
-        
+
     }
 }

@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
 /**
  * @author Maciej Dabrowski
  * @author Julia Anaya
- * 
+ *
  */
 public class SPARQLQuery {
 
@@ -38,12 +38,12 @@ public class SPARQLQuery {
 	private static SPARQLQueryType defaultQueryType = SPARQLQueryType.INSERT;
 
 	static Logger logger = Logger.getLogger(SPARQLQuery.class);
-    
+
     public SPARQLQuery() {}
 
 	/**
 	 * Simple method that wraps the triples with default query type
-	 * 
+	 *
 	 * @param triples
 	 * @throws QueryTypeException
 	 * @throws ExtractionException
@@ -52,16 +52,14 @@ public class SPARQLQuery {
 //	public SPARQLQuery(String triples) throws IOException, QueryTypeException {
 //		query = wrapTriples(defaultQueryType, triples);
 //	}
-    
-	/**
-	 * 
-	 * @param queryType
-	 *            - type of the query to be issued
-	 * @param triplesSource
-	 *            - file containing the triples in n3 format
-	 * @throws IOException
-	 * @throws ExtractionException
-	 */
+
+    /**
+     *
+     * @param queryType
+     * @param triplesSource
+     * @throws IOException
+     * @throws QueryTypeException
+     */
 	public SPARQLQuery(SPARQLQueryType queryType, String triplesSource)
 			throws IOException, QueryTypeException {
 
@@ -78,7 +76,12 @@ public class SPARQLQuery {
 
 		logger.debug(query);
 	}
-    
+
+    /**
+     *
+     * @param triples
+     * @throws QueryTypeException
+     */
 	public void wrapTriples(String triples)
 			throws QueryTypeException {
         wrapTriples(defaultQueryType, triples);
@@ -87,7 +90,7 @@ public class SPARQLQuery {
 	/**
 	 * Method returns a query of a defined type that contains triples provided
 	 * as a second parameter
-	 * 
+	 *
 	 * @param queryType
 	 * @param triples
 	 * @return
@@ -116,7 +119,7 @@ public class SPARQLQuery {
 
 	/**
 	 * Method that reads triples data from a file.
-	 * 
+	 *
 	 * @param fileName
 	 *            - name of the file that contains the triples
 	 * @return
@@ -145,7 +148,7 @@ public class SPARQLQuery {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param triplesSource
 	 * @return
 	 * @throws IOException
@@ -187,13 +190,21 @@ public class SPARQLQuery {
 //		String n3 = out.toString("UTF-8");
 //		return n3;
 //	}
-    
-    public String fromXML(String xmlquery) throws ParserConfigurationException, SAXException, IOException {  
-        xmlquery = xmlquery.replace("INSERT", "<![CDATA[ INSERT").replace("</query>", "]]></query>");  
+
+    /**
+     * 
+     * @param xmlquery
+     * @return
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public String fromXML(String xmlquery) throws ParserConfigurationException, SAXException, IOException {
+        xmlquery = xmlquery.replace("INSERT", "<![CDATA[ INSERT").replace("</query>", "]]></query>");
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         InputSource is = new InputSource(new StringReader(xmlquery));
         DocumentBuilder db = dbf.newDocumentBuilder();
-        Document dom = db.parse(is);	
+        Document dom = db.parse(is);
         Node queryNode = dom.getElementsByTagName("query").item(0);
         Element queryElement = (Element)queryNode;
         query = ((Node)queryElement.getChildNodes().item(0)).getNodeValue();
@@ -201,7 +212,7 @@ public class SPARQLQuery {
     }
 
 	/**
-	 * 
+	 *
 	 * @return xml compliant query
 	 */
 	public String toXML() {
@@ -212,7 +223,7 @@ public class SPARQLQuery {
 
 	/**
 	 * Get query RDF content
-	 * 
+	 *
 	 * @return String that contains RDF data
 	 */
 	public String getTriples() {
@@ -221,7 +232,7 @@ public class SPARQLQuery {
 
 	/**
 	 * Set query content
-	 * 
+	 *
 	 * @param triples
 	 */
 	public void setTriples(String triples) {
@@ -232,7 +243,7 @@ public class SPARQLQuery {
 
 	/**
 	 * Get the SPARQL 1.1 Query
-	 * 
+	 *
 	 * @return
 	 */
 	public String getQuery() {
@@ -241,7 +252,7 @@ public class SPARQLQuery {
 
 	/**
 	 * Set the query string
-	 * 
+	 *
 	 * @param query
 	 */
 	public void setQuery(String query) {
@@ -250,7 +261,7 @@ public class SPARQLQuery {
 
 	/**
 	 * Get the query string
-	 * 
+	 *
 	 * @return
 	 */
 	public SPARQLQueryType getQueryType() {
@@ -258,7 +269,7 @@ public class SPARQLQuery {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param queryType
 	 */
 	public void setQueryType(SPARQLQueryType queryType) {
