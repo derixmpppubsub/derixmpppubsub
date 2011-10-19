@@ -32,6 +32,7 @@ public class Subscriber extends PubSubClient {
             throws XMPPException, InterruptedException {
         super(userName, password, xmppserver);
         initNodesSubscribedTo();
+//        logger.debug("no initialization");
     }
 
     /**
@@ -121,6 +122,19 @@ public class Subscriber extends PubSubClient {
 //            nodesSubscribedTo.add(node.getId());
         nodeSubscriptions.put(nodeName, node);
         logger.debug(this.getUser() + " subscribed to node " + node.getId());
+    }
+
+    public void getOrCreateSubscription(String nodeName) throws XMPPException {
+        Subscription s = new Subscription(this.getUser(), nodeName);
+        if (mgr.getSubscriptions().contains(s)) {
+            //never enter here but subscribe twice
+            logger.debug("subsription to node " + s.getNode() + " by " + s.getJid()
+                    +  " with id " + s.getId() + " already exists");
+        } else {
+            this.getNode(nodeName).subscribe(this.getUser());
+            logger.debug(this.getUser() + " subscribed to node " + nodeName);
+        }
+
     }
 
     /**
@@ -280,7 +294,8 @@ public class Subscriber extends PubSubClient {
 //            String endpoint = "http://localhost:8000/update/";
 //            String  nodeName = "node1";
 //            Subscriber p = new Subscriber("subscriber.properties");
-            Subscriber s = new Subscriber("test4sub1", "test4sub1pass", args[0]);
+            Subscriber s = new Subscriber("sub1", "sub1pass", args[0]);
+            s.getOrCreateSubscription("node1");
             List<Affiliation> affs = s.mgr.getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();
@@ -296,6 +311,11 @@ public class Subscriber extends PubSubClient {
 //                Subscription.State = sub.getState();
                 logger.debug(jid + "has subscription" + id + "to node" + nodeNam);
             }
+            //5950 [main] DEBUG org.deri.xmpppubsub.PubSubClient  - sub1@127.0.0.1/Smack subscribed to node node1
+            //5957 [main] DEBUG org.deri.xmpppubsub.PubSubClient  - sub1@127.0.0.1/Smackis affiliated to node node1
+            //5967 [main] DEBUG org.deri.xmpppubsub.PubSubClient  - sub1@127.0.0.1/Smackhas subscription4DhqDi3jBxqNWLbjw2xLm7CO6r9CXq0hs2zRRA3Pto nodenode1
+            //5967 [main] DEBUG org.deri.xmpppubsub.PubSubClient  - sub1@127.0.0.1/Smackhas subscriptionhJY0J9v87F7ki6R3T8NVo0ebTU59FqVoIM0m3N9Xto nodenode1
+
 
 //            p.addListenerToNode("sub1of1", nodeName, fileName, endpoint);
 //            p.subscribeIfNotSubscribedTo(nodeName);
