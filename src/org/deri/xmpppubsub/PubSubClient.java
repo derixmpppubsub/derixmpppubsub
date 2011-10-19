@@ -154,8 +154,12 @@ public class PubSubClient {
      *
      */
     public void disconnect() {
-        connection.disconnect();
-        logger.info("disconected");
+        try {
+            connection.disconnect();
+            logger.info("disconected");
+        } catch(java.lang.IllegalStateException e) {
+            logger.error(e);
+        }
     }
 
     /**

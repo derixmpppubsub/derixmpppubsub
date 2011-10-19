@@ -10,6 +10,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.Affiliation;
 import org.jivesoftware.smackx.pubsub.LeafNode;
+import org.jivesoftware.smackx.pubsub.Subscription;
 
 /**
  * @author Maciej Dabrowski
@@ -273,20 +274,35 @@ public class Subscriber extends PubSubClient {
             logger.setLevel(Level.DEBUG);
             logger.debug("Entering application.");
 
-            XMPPConnection.DEBUG_ENABLED = true;
+//            XMPPConnection.DEBUG_ENABLED = true;
 
-            String fileName = "results.csv";
-            String endpoint = "http://localhost:8000/update/";
-            String  nodeName = "node1";
-            Subscriber p = new Subscriber("subscriber.properties");
+//            String fileName = "results.csv";
+//            String endpoint = "http://localhost:8000/update/";
+//            String  nodeName = "node1";
+//            Subscriber p = new Subscriber("subscriber.properties");
+            Subscriber s = new Subscriber("test4sub1", "test4sub1pass", args[0]);
+            List<Affiliation> affs = s.mgr.getAffiliations();
+            for(Affiliation aff : affs ) {
+                String nodeName = aff.getNodeId();
+//                Affiliation.Type = aff.getType();
+                logger.debug(s.getUser() + "is affiliated to node "
+                        + nodeName);
+            }
+            List<Subscription> subs = s.mgr.getSubscriptions();
+            for(Subscription sub: subs) {
+                String jid = sub.getJid();
+                String id = sub.getId();
+                String nodeNam = sub.getNode();
+//                Subscription.State = sub.getState();
+                logger.debug(jid + "has subscription" + id + "to node" + nodeNam);
+            }
 
-            p.addListenerToNode("sub1of1", nodeName, fileName, endpoint);
-            p.subscribeIfNotSubscribedTo(nodeName);
+//            p.addListenerToNode("sub1of1", nodeName, fileName, endpoint);
+//            p.subscribeIfNotSubscribedTo(nodeName);
 
 
-
-        } catch (IOException e) {
-            logger.error(e);
+//        } catch (IOException e) {
+//            logger.error(e);
         } catch (XMPPException e) {
             logger.error(e);
         } catch (InterruptedException e) {
