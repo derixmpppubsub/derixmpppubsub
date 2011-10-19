@@ -56,7 +56,7 @@ public class ItemEventCoordinator implements ItemEventListener {
 //        long end = System.nanoTime();
 //        logger.debug("en listener");
 
-        String fileHeadersTemplate = "nTests,nTest,nSubs,nPubs,nTriples,"
+        String fileHeadersTemplate = "nTests,nTest,nSubs,nPubs,nTriples,sizeMsg,"
             + "subName,pubName,tPubStore,tPushMsg,tSubStore,tTotal\n";
         String fileNameTemplate = "results/nTests%snSubs%snPubs%snTriples%s.csv";
         String msgIdTemplate = "%s,%s,%s,%s,%s,%s,%s";
@@ -67,9 +67,9 @@ public class ItemEventCoordinator implements ItemEventListener {
             //tPubStore, tMsg.toString(), tSubStore.toString(), tTotal.toString()
         String fileName;
         String endpoint = "http://localhost:8000/update/";
-        int nColMsgId = 7;
+        int nColMsgId = 8;
         String[] columns = new String[nColMsgId];
-        String nTests, nSubs, nPubs, nTriples, pubName, tPubStore, tStartMsg;
+        String nTests, nTest, nSubs, nPubs, nTriples, pubName, tPubStore, tStartMsg;
         String itemId, query, sizeMsg, line;
         Long tSubStore, tMsg, tTotal;
 
@@ -84,12 +84,13 @@ public class ItemEventCoordinator implements ItemEventListener {
 
                 columns = itemId.split(",");
                 nTests = columns[0];
-                nSubs = columns[1];
-                nPubs = columns[2];
-                nTriples = columns[3];
-                pubName = columns[4];
-                tPubStore = columns[5];
-                tStartMsg = columns[6];
+                nTest = columns[1];
+                nSubs = columns[2];
+                nPubs = columns[3];
+                nTriples = columns[4];
+                pubName = columns[5];
+                tPubStore = columns[6];
+                tStartMsg = columns[7];
 
                 tMsg = end - Long.valueOf(tStartMsg);
                 //logger.debug("elapsed time: " + msgTime);
@@ -112,11 +113,11 @@ public class ItemEventCoordinator implements ItemEventListener {
 //                        "," + tPubStore + "," + tMsg.toString() + ","+
 //                        tSubStore.toString() + "," + tTotal.toString() + "\n";
 
-                line = String.format(fileLineTemplate, nTests, nSubs, nPubs, nTriples,
+                line = String.format(fileLineTemplate, nTests, nTest, nSubs, nPubs, nTriples,
                         sizeMsg.toString(), subName, pubName, tPubStore,
                         tMsg.toString(), tSubStore.toString(), tTotal.toString());
 
-                fileName = String.format(fileNameTemplate, nSubs, nPubs, nTriples);
+                fileName = String.format(fileNameTemplate, nTests, nSubs, nPubs, nTriples);
                 // if file doesnt exist, create headers
                 File file = new File(fileName);
 //                FileWriter writer = new FileWriter(fileName, true);
