@@ -56,13 +56,13 @@ public class ItemEventCoordinator implements ItemEventListener {
 //        long end = System.nanoTime();
 //        logger.debug("en listener");
 
-        String fileHeadersTemplate = "nTests,nSubs,nPubs,nTriples,sizeMsg"
+        String fileHeadersTemplate = "nTests,nTest,nSubs,nPubs,nTriples,"
             + "subName,pubName,tPubStore,tPushMsg,tSubStore,tTotal\n";
-        String fileNameTemplate = "results/nSubs%snPubs%snTriples%s.csv";
+        String fileNameTemplate = "results/nTests%snSubs%snPubs%snTriples%s.csv";
         String msgIdTemplate = "%s,%s,%s,%s,%s,%s,%s";
-            //nTests,nSubs,nPubs,nTriples,pubName,tPubStore,tStartMsg
-        String fileLineTemplate = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n";
-            //nTests, nSubs, nPubs, nTriples,sizeMsg.toString(),
+            //nTests, nTest, nSubs, nPubs, nTriples,pubName, tPubStore
+        String fileLineTemplate = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n";
+            //nTests, nTest, nSubs, nPubs, nTriples,sizeMsg.toString(),
             //subName, pubName,
             //tPubStore, tMsg.toString(), tSubStore.toString(), tTotal.toString()
         String fileName;
@@ -120,9 +120,12 @@ public class ItemEventCoordinator implements ItemEventListener {
                 // if file doesnt exist, create headers
                 File file = new File(fileName);
 //                FileWriter writer = new FileWriter(fileName, true);
-                FileWriter writer = new FileWriter(file, true);
+                FileWriter writer;
                 if (!file.exists()) {
+                    writer = new FileWriter(file, true);
                     writer.write(fileHeadersTemplate);
+                } else {
+                    writer = new FileWriter(file, true);
                 }
                 writer.write(line);
                 writer.flush();
