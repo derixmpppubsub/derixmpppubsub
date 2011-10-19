@@ -1,5 +1,6 @@
 package org.deri.xmpppubsub;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -59,8 +60,11 @@ public class ItemEventCoordinator implements ItemEventListener {
             + "subName,pubName,tPubStore,tPushMsg,tSubStore,tTotal\n";
         String fileNameTemplate = "results/nSubs%snPubs%snTriples%s.csv";
         String msgIdTemplate = "%s,%s,%s,%s,%s,%s,%s";
-//                    //nTests,nSubs,nPubs,nTriples,pubName,tPubStore,tStartMsg
+            //nTests,nSubs,nPubs,nTriples,pubName,tPubStore,tStartMsg
         String fileLineTemplate = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n";
+            //nTests, nSubs, nPubs, nTriples,sizeMsg.toString(),
+            //subName, pubName,
+            //tPubStore, tMsg.toString(), tSubStore.toString(), tTotal.toString()
         String fileName;
         String endpoint = "http://localhost:8000/update/";
         int nColMsgId = 7;
@@ -114,8 +118,12 @@ public class ItemEventCoordinator implements ItemEventListener {
 
                 fileName = String.format(fileNameTemplate, nSubs, nPubs, nTriples);
                 // if file doesnt exist, create headers
-                FileWriter writer = new FileWriter(fileName, true);
-
+                File file = new File(fileName);
+//                FileWriter writer = new FileWriter(fileName, true);
+                FileWriter writer = new FileWriter(file, true);
+                if (!file.exists()) {
+                    writer.write(fileHeadersTemplate);
+                }
                 writer.write(line);
                 writer.flush();
                 writer.close();

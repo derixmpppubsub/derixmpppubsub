@@ -94,6 +94,12 @@ public class Publisher extends PubSubClient {
         return node;
     }
 
+    @Override
+    public LeafNode getNode(String nodename) throws XMPPException {
+        node = super.getNode(nodename);
+        return node;
+    }
+
     /**
      *
      * @param nodename
