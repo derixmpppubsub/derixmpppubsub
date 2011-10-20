@@ -294,8 +294,8 @@ public class Subscriber extends PubSubClient {
 //            String endpoint = "http://localhost:8000/update/";
 //            String  nodeName = "node1";
 //            Subscriber p = new Subscriber("subscriber.properties");
-            Subscriber s = new Subscriber("sub1", "sub1pass", args[0]);
-            s.getOrCreateSubscription("node1");
+            Subscriber s = new Subscriber("sub1", "pass", args[0]);
+//            s.getOrCreateSubscription("node1");
             List<Affiliation> affs = s.mgr.getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();

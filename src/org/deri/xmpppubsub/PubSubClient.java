@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.LeafNode;
@@ -125,6 +126,8 @@ public class PubSubClient {
     public void init(String userName, String password, String domain,
             int port, boolean createAccountIfNotExist) throws XMPPException,
             InterruptedException {
+        SmackConfiguration.setPacketReplyTimeout(60000);
+        
         ConnectionConfiguration config = new ConnectionConfiguration(domain
                 ,port);
         connection = new XMPPConnection(config);
