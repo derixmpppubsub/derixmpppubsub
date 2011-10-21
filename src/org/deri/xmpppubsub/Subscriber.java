@@ -177,7 +177,18 @@ public class Subscriber extends PubSubClient {
     public void addListenerToAllNodes(String subSeq)
             throws XMPPException, IOException {
         for(LeafNode node : nodeSubscriptions.values()) {
-            node.addItemEventListener(new ItemEventCoordinator(subSeq));
+            // to see the thread stack when the mem error is due to the stack
+            try {
+                node.addItemEventListener(new ItemEventCoordinator(subSeq));
+            } catch(OutOfMemoryError e) {
+                logger.error(e.getMessage());
+                Thread.getAllStackTraces();
+                Thread.dumpStack();
+//                 Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//                     public void uncaughtException( final Thread t, final Throwable e ) {
+//                     }
+//                 });
+            }
         }
     }
 

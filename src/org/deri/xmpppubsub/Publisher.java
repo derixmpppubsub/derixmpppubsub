@@ -133,7 +133,12 @@ public class Publisher extends PubSubClient {
         PayloadItem<SimplePayload> item = new PayloadItem<SimplePayload>(
           msgId + "," + System.currentTimeMillis(), payloadNS);
         //logger.debug(item.toString());
-        node.send(item);
+        try {
+            node.send(item);
+        } catch(XMPPException e) {
+            logger.error("server timeout?");
+            logger.error(e.getMessage());
+        }
 //        logger.debug("item sent");
     }
 
