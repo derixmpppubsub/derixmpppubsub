@@ -57,13 +57,13 @@ public class ItemEventCoordinator implements ItemEventListener {
 //        logger.debug("en listener");
 
         String fileHeadersTemplate = "nTests,nTest,nSubs,nPubs,nTriples,sizeMsg,"
-            + "subName,pubName,tPubStore,tPushMsg,tSubStore,tTotal\n";
+            + "subName,pubName,sTimestamp,eTimestamp,tPubStore,tPushMsg,tSubStore,tTotal\n";
         String fileNameTemplate = "results/nTests%snSubs%snPubs%snTriples%s.csv";
         String msgIdTemplate = "%s,%s,%s,%s,%s,%s,%s";
             //nTests, nTest, nSubs, nPubs, nTriples,pubName, tPubStore
-        String fileLineTemplate = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n";
+        String fileLineTemplate = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n";
             //nTests, nTest, nSubs, nPubs, nTriples,sizeMsg.toString(),
-            //subName, pubName,
+            //subName, pubName, stimestamp,etimestamp
             //tPubStore, tMsg.toString(), tSubStore.toString(), tTotal.toString()
         String fileName;
         String endpoint = "http://localhost:8000/update/";
@@ -114,7 +114,7 @@ public class ItemEventCoordinator implements ItemEventListener {
 //                        tSubStore.toString() + "," + tTotal.toString() + "\n";
 
                 line = String.format(fileLineTemplate, nTests, nTest, nSubs, nPubs, nTriples,
-                        sizeMsg.toString(), subName, pubName, tPubStore,
+                        sizeMsg.toString(), subName, pubName, tStartMsg, end, tPubStore,
                         tMsg.toString(), tSubStore.toString(), tTotal.toString());
 
                 fileName = String.format(fileNameTemplate, nTests, nSubs, nPubs, nTriples);
