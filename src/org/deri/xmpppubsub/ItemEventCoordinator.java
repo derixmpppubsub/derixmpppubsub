@@ -7,6 +7,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.log4j.Logger;
+import org.deri.xmpppubsub.data.SPARQLQuery;
+import org.deri.xmpppubsub.data.SPARQLWrapper;
 import org.jivesoftware.smackx.pubsub.Item;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.listener.ItemEventListener;
@@ -50,7 +52,6 @@ public class ItemEventCoordinator implements ItemEventListener {
      *
      * @param items
      */
-    @Override
     public void handlePublishedItems(ItemPublishEvent items) {
         long end = System.currentTimeMillis();
 //        long end = System.nanoTime();
@@ -66,6 +67,8 @@ public class ItemEventCoordinator implements ItemEventListener {
             //subName, pubName, stimestamp,etimestamp
             //tPubStore, tMsg.toString(), tSubStore.toString(), tTotal.toString()
         String fileName;
+        
+        //TODO: move t
         String endpoint = "http://localhost:8000/update/";
         int nColMsgId = 8;
         String[] columns = new String[nColMsgId];
@@ -75,12 +78,10 @@ public class ItemEventCoordinator implements ItemEventListener {
 
         try {
             SPARQLQuery sq = new SPARQLQuery();
-//            SPARQLWrapper sw = new SPARQLWrapper();
 
             List<Item> its = items.getItems();
             for(Item item : its) {
                 itemId = item.getId();
-//                logger.debug("received item id" + itemId);
 
                 columns = itemId.split(",");
                 nTests = columns[0];

@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.BasicConfigurator;
-import org.jivesoftware.smack.XMPPConnection;
+import org.apache.log4j.Level;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.Affiliation;
 import org.jivesoftware.smackx.pubsub.LeafNode;
@@ -84,7 +83,7 @@ public class Subscriber extends PubSubClient {
     public void initNodesSubscribedTo() throws XMPPException {
         nodeSubscriptions = new HashMap<String, LeafNode>();
         try {
-            List<Affiliation> affs = mgr.getAffiliations();
+            List<Affiliation> affs = this.pubSubMgr.getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();
 //                logger.debug(this.getUser() + "is affiliated to node "
@@ -124,9 +123,11 @@ public class Subscriber extends PubSubClient {
         logger.debug(this.getUser() + " subscribed to node " + node.getId());
     }
 
+    
+    
     public void getOrCreateSubscription(String nodeName) throws XMPPException {
         Subscription s = new Subscription(this.getUser(), nodeName);
-        if (mgr.getSubscriptions().contains(s)) {
+        if (this.pubSubMgr.getSubscriptions().contains(s)) {
             //never enter here but subscribe twice
             logger.debug("subsription to node " + s.getNode() + " by " + s.getJid()
                     +  " with id " + s.getId() + " already exists");
@@ -307,14 +308,14 @@ public class Subscriber extends PubSubClient {
 //            Subscriber p = new Subscriber("subscriber.properties");
             Subscriber s = new Subscriber("sub1", "pass", args[0]);
 //            s.getOrCreateSubscription("node1");
-            List<Affiliation> affs = s.mgr.getAffiliations();
+            List<Affiliation> affs = s.getPubSubMgr().getAffiliations();
             for(Affiliation aff : affs ) {
                 String nodeName = aff.getNodeId();
 //                Affiliation.Type = aff.getType();
                 logger.debug(s.getUser() + "is affiliated to node "
                         + nodeName);
             }
-            List<Subscription> subs = s.mgr.getSubscriptions();
+            List<Subscription> subs = s.getPubSubMgr().getSubscriptions();
             for(Subscription sub: subs) {
                 String jid = sub.getJid();
                 String id = sub.getId();

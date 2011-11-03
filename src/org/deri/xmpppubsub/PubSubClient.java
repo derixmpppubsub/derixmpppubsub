@@ -21,8 +21,9 @@ import org.jivesoftware.smackx.pubsub.PubSubManager;
 public class PubSubClient {
 
     protected XMPPConnection connection;
-    public PubSubManager mgr;
-//    public LeafNode node;
+    protected PubSubManager pubSubMgr;
+
+	//    public LeafNode node;
     protected static Logger logger = Logger.getLogger(PubSubClient.class);
 
     /**
@@ -76,13 +77,6 @@ public class PubSubClient {
     public PubSubClient(String fileName, boolean createAccountIfNotExist)
             throws IOException, XMPPException, InterruptedException {
             // the file path was not correct
-    //      Configuration config = new PropertiesConfiguration(fileName);
-    //      // declare variables
-    //      String username = config.getString("username");
-    //      String password = config.getString("password");
-    //      String xmppserver = config.getString("xmppserver");
-    //      int port = config.getInt("port");
-
             Properties prop = new Properties();
             File file = new File(fileName);
             String filePath = file.getCanonicalPath();
@@ -148,7 +142,7 @@ public class PubSubClient {
             logger.info("User " + connection.getUser() + " already login ");
         }
 
-        mgr = new PubSubManager(connection);
+        pubSubMgr = new PubSubManager(connection);
 //        logger.info("PubSub manager created");
     }
 
@@ -180,8 +174,27 @@ public class PubSubClient {
      * @throws XMPPException
      */
     public LeafNode getNode(String nodename) throws XMPPException {
-        LeafNode node = (LeafNode) mgr.getNode(nodename);
+        LeafNode node = (LeafNode) pubSubMgr.getNode(nodename);
 //        logger.info("got node " + nodename);
         return node;
     }
+    
+    /**
+    * getter for the PubSubManager
+    *
+    * @return PubSubManager
+    */
+    public PubSubManager getPubSubMgr() {
+		return pubSubMgr;
+	}
+
+    /**
+    * setter for the PubSubManager
+    * 
+    * @param PubSubManager instance
+    * @throws XMPPException
+    */
+	public void setPubSubMgr(PubSubManager pubSubMgr) {
+		this.pubSubMgr = pubSubMgr;
+	}
 }
